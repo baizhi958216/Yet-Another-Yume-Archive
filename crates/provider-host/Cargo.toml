@@ -1,0 +1,15 @@
+[package]
+name = "yaya-provider-host"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Provider discovery, subprocess protocol transport and management for YAYA hosts"
+
+[dependencies]
+async-trait = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+yaya-provider-api = { path = "../provider-api" }
