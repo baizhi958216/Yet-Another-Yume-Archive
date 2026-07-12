@@ -1,0 +1,21 @@
+[package]
+name = "provider-direct"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Built-in direct HTTP/HTTPS download provider"
+
+[dependencies]
+async-trait = { workspace = true }
+mime_guess = { workspace = true }
+percent-encoding = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+url = { workspace = true }
+yaya-download-engine = { workspace = true }
+yaya-provider-api = { workspace = true }
+yaya-provider-host = { workspace = true }

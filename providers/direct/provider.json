@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "direct",
+  "name": "Direct Download",
+  "version": "0.1.0",
+  "description": "下载 HTTP 或 HTTPS 地址指向的内容。",
+  "enabledByDefault": true,
+  "priority": -100,
+  "capabilities": { "authentication": false },
+  "matches": [
+    { "kind": "prefix", "value": "http://" },
+    { "kind": "prefix", "value": "https://" }
+  ],
+  "executables": {
+    "aarch64-apple-darwin": ["target/release/provider-direct", "target/debug/provider-direct"],
+    "x86_64-apple-darwin": ["target/release/provider-direct", "target/debug/provider-direct"],
+    "x86_64-unknown-linux-gnu": ["target/release/provider-direct", "target/debug/provider-direct"],
+    "aarch64-unknown-linux-gnu": ["target/release/provider-direct", "target/debug/provider-direct"],
+    "x86_64-pc-windows-msvc": ["target/release/provider-direct.exe", "target/debug/provider-direct.exe"]
+  }
+}
