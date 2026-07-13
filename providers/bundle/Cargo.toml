@@ -1,0 +1,14 @@
+# GENERATED DEFAULT — scripts/gen-bundle.mjs may overwrite this file from a
+# local (gitignored) bundle.config.json. The checked-in version registers only
+# the built-in direct provider and must never name any site-specific provider.
+[package]
+name = "yaya-provider-bundle"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Static provider registration point (default: direct provider only)"
+
+[dependencies]
+provider-direct = { path = "../direct/crates/provider-direct" }
+yaya-provider-api = { path = "../../crates/provider-api" }
+yaya-provider-host = { path = "../../crates/provider-host" }
