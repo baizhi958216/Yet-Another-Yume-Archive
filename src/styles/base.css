@@ -1,0 +1,169 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  color: var(--ink);
+  background: var(--canvas);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --canvas: #f7f9f8;
+  --surface: #ffffff;
+  --elevated: #ffffff;
+  --soft: #eef2f0;
+  --line: #dfe6e3;
+  --soft-hover: #e8edeb;
+  --ink: #17211e;
+  --muted: #6f7d78;
+  --accent: #10a37f;
+  --accent-hover: #0e8c6d;
+  --accent-soft: rgba(16, 163, 127, .1);
+  --accent-ring: rgba(16, 163, 127, .18);
+  --danger: #d34a5b;
+  --danger-soft: rgba(211, 74, 91, .09);
+  --danger-line: rgba(211, 74, 91, .28);
+  --danger-hover: #c14152;
+  --warning: #b36a18;
+  --success: #30a46c;
+  --overlay: rgba(10, 16, 14, .5);
+  --shadow-raised: 0 1px 3px rgba(23, 33, 30, .07);
+  --shadow-popover: 0 8px 24px rgba(23, 33, 30, .1), 0 2px 6px rgba(23, 33, 30, .05);
+  --shadow-modal: 0 16px 48px rgba(23, 33, 30, .14), 0 4px 12px rgba(23, 33, 30, .06);
+}
+
+:root[data-theme='dark'] {
+  --canvas: #121715;
+  --surface: #1a211e;
+  --elevated: #1c2421;
+  --soft: #252e2a;
+  --line: #303b36;
+  --soft-hover: #2a3430;
+  --ink: #edf3f0;
+  --muted: #98a6a0;
+  --danger: #f0717f;
+  --danger-soft: rgba(240, 113, 127, .12);
+  --danger-line: rgba(240, 113, 127, .3);
+  --danger-hover: #e25b6b;
+  --warning: #e5a750;
+  --success: #52c184;
+  --overlay: rgba(0, 0, 0, .6);
+  --shadow-raised: 0 1px 3px rgba(0, 0, 0, .4);
+  --shadow-popover: 0 8px 24px rgba(0, 0, 0, .45), 0 2px 6px rgba(0, 0, 0, .3);
+  --shadow-modal: 0 16px 48px rgba(0, 0, 0, .55);
+}
+
+* { box-sizing: border-box; }
+html, body, #app { width: 100%; min-width: 320px; min-height: 100%; margin: 0; }
+body { min-height: 100vh; background: var(--canvas); }
+button, input, select, textarea { font: inherit; letter-spacing: 0; color: inherit; margin: 0; }
+/* iOS zooms the page when a focused control's font-size is below 16px;
+   keep phone-width form controls at 16px so focusing never rescales.
+   !important so utility classes like text-sm/text-2xs can't undercut it. */
+@media (max-width: 767px) {
+  input, select, textarea { font-size: 16px !important; }
+}
+button, select { -webkit-appearance: none; appearance: none; }
+button {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+::selection { color: white; background: var(--accent); }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { border: 2px solid transparent; border-radius: 8px; background: var(--line); background-clip: padding-box; }
+
+.page-enter-active,
+.page-leave-active,
+.content-enter-active,
+.content-leave-active,
+.title-enter-active,
+.title-leave-active,
+.notice-enter-active,
+.notice-leave-active,
+.mobile-forward-enter-active,
+.mobile-forward-leave-active,
+.mobile-back-enter-active,
+.mobile-back-leave-active,
+.popover-enter-active,
+.popover-leave-active {
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.page-enter-from,
+.content-enter-from,
+.title-enter-from,
+.notice-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.page-leave-to,
+.content-leave-to,
+.title-leave-to,
+.notice-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.mobile-forward-enter-from,
+.mobile-back-leave-to {
+  opacity: 0;
+  transform: translateX(32px);
+}
+
+.mobile-forward-leave-to,
+.mobile-back-enter-from {
+  opacity: 0;
+  transform: translateX(-32px);
+}
+
+.mobile-forward-leave-active,
+.mobile-back-leave-active {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+}
+
+.popover-enter-from,
+.popover-leave-to {
+  opacity: 0;
+  transform: translateY(-6px) scale(.98);
+}
+
+.popover-enter-active,
+.popover-leave-active {
+  transform-origin: top right;
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 200ms ease;
+}
+
+.modal-enter-active > [role='dialog'],
+.modal-leave-active > [role='dialog'] {
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.modal-enter-from,
+.modal-leave-to,
+.modal-enter-from > [role='dialog'],
+.modal-leave-to > [role='dialog'] {
+  opacity: 0;
+}
+
+.modal-enter-from > [role='dialog'],
+.modal-leave-to > [role='dialog'] {
+  transform: translateY(8px) scale(.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
