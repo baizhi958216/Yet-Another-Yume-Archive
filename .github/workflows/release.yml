@@ -1,0 +1,201 @@
+name: Release
+
+# Optional secrets (all omittable — without them CI ships the direct provider only):
+#   PROVIDERS_REPO       owner/repo of an extra-provider repository, checked out
+#                        as a sibling of this repo (its workspace may reference
+#                        ../yaya). Example: you/your-provider-repo
+#   PROVIDERS_GIT_TOKEN  read token for PROVIDERS_REPO when it is private
+#   BUNDLE_CONFIG_JSON   contents of bundle.config.json; path entries are
+#                        resolved from providers/bundle, so a sibling checkout
+#                        is reachable as ../../../providers-ext/<shim-path>
+#   ANDROID_KEYSTORE_B64      base64 of the release keystore (.jks)
+#   ANDROID_KEYSTORE_PASSWORD store/key password
+#   ANDROID_KEY_ALIAS         key alias
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+env:
+  PROVIDERS_REPO: ${{ secrets.PROVIDERS_REPO }}
+  BUNDLE_CONFIG: ${{ secrets.BUNDLE_CONFIG_JSON }}
+
+jobs:
+  desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            args: --target aarch64-apple-darwin
+          - os: macos-latest
+            args: --target x86_64-apple-darwin
+          - os: ubuntu-22.04
+            args: ''
+          - os: windows-latest
+            args: ''
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: yaya
+      - name: Checkout extra providers
+        if: env.PROVIDERS_REPO != ''
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.PROVIDERS_REPO }}
+          token: ${{ secrets.PROVIDERS_GIT_TOKEN || github.token }}
+          path: providers-ext
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: yaya
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: yaya/package-lock.json
+      - name: Linux system deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - name: Inject provider bundle
+        if: env.BUNDLE_CONFIG != ''
+        shell: bash
+        working-directory: yaya
+        run: |
+          printf '%s' "$BUNDLE_CONFIG" > bundle.config.json
+          node scripts/gen-bundle.mjs
+      - run: npm ci
+        working-directory: yaya
+      - name: Build desktop bundles
+        working-directory: yaya
+        run: npm run tauri build -- ${{ matrix.args }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yaya-desktop-${{ matrix.os }}-${{ strategy.job-index }}
+          path: |
+            yaya/target/**/release/bundle/**/*.dmg
+            yaya/target/**/release/bundle/**/*.AppImage
+            yaya/target/**/release/bundle/**/*.deb
+            yaya/target/**/release/bundle/**/*.rpm
+            yaya/target/**/release/bundle/**/*.msi
+            yaya/target/**/release/bundle/**/*.exe
+
+  android:
+    runs-on: ubuntu-22.04
+    env:
+      ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: yaya
+      - name: Checkout extra providers
+        if: env.PROVIDERS_REPO != ''
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.PROVIDERS_REPO }}
+          token: ${{ secrets.PROVIDERS_GIT_TOKEN || github.token }}
+          path: providers-ext
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Install NDK
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;27.1.12297006" >/dev/null
+          echo "NDK_HOME=$ANDROID_HOME/ndk/27.1.12297006" >> "$GITHUB_ENV"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: yaya
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: yaya/package-lock.json
+      - name: Inject provider bundle
+        if: env.BUNDLE_CONFIG != ''
+        shell: bash
+        working-directory: yaya
+        run: |
+          printf '%s' "$BUNDLE_CONFIG" > bundle.config.json
+          node scripts/gen-bundle.mjs
+      - name: Release signing config
+        if: env.ANDROID_KEYSTORE_B64 != ''
+        shell: bash
+        working-directory: yaya
+        run: |
+          printf '%s' "$ANDROID_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          cat > src-tauri/gen/android/keystore.properties <<EOF
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          storeFile=$RUNNER_TEMP/release.jks
+          EOF
+      - run: npm ci
+        working-directory: yaya
+      - name: Build Android bundles
+        working-directory: yaya
+        run: npm run tauri android build -- --apk --aab
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yaya-android
+          path: |
+            yaya/src-tauri/gen/android/app/build/outputs/apk/**/release/*.apk
+            yaya/src-tauri/gen/android/app/build/outputs/bundle/**/*.aab
+
+  web:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-22.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: yaya
+      - name: Checkout extra providers
+        if: env.PROVIDERS_REPO != ''
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.PROVIDERS_REPO }}
+          token: ${{ secrets.PROVIDERS_GIT_TOKEN || github.token }}
+          path: providers-ext
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: yaya
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: yaya/package-lock.json
+      - name: Inject provider bundle
+        if: env.BUNDLE_CONFIG != ''
+        shell: bash
+        working-directory: yaya
+        run: |
+          printf '%s' "$BUNDLE_CONFIG" > bundle.config.json
+          node scripts/gen-bundle.mjs
+      - run: npm ci
+        working-directory: yaya
+      - run: npm run build
+        working-directory: yaya
+      - run: cargo build --release -p yaya-web
+        working-directory: yaya
+      - name: Package web host
+        shell: bash
+        working-directory: yaya
+        run: |
+          mkdir -p out/yaya-web
+          cp target/release/yaya-web* out/yaya-web/ 2>/dev/null || true
+          cp -r dist out/yaya-web/dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yaya-web-${{ matrix.os }}
+          path: yaya/out/yaya-web
