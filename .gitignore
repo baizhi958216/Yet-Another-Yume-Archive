@@ -7,6 +7,7 @@ target/
 # generated provider bundle config (never commit provider names into host history)
 bundle.config.json
 bundle.config.json.*
+providers/.data/
 
 # android release signing (local only, never commit)
 src-tauri/gen/android/keystore.properties
