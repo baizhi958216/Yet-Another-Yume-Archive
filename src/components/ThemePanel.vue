@@ -1,9 +1,16 @@
 <script setup lang="ts">
 import type { ThemeMode } from '../composables/useTheme'
-import { useTheme } from '../composables/useTheme'
+import { DEFAULT_ACCENT, useTheme } from '../composables/useTheme'
 
 const { mode, accent } = useTheme()
-const colors = ['#10a37f', '#0f8bd7', '#7c6ee6', '#e4557b', '#e07a32', '#6b8e23']
+const colors = [
+  { value: DEFAULT_ACCENT, label: 'YAYA' },
+  { value: '#10a37f', label: '青绿' },
+  { value: '#0f8bd7', label: '蓝色' },
+  { value: '#7c6ee6', label: '紫色' },
+  { value: '#e07a32', label: '橙色' },
+  { value: '#6b8e23', label: '橄榄绿' },
+]
 const modes: Array<{ value: ThemeMode, label: string, icon: string }> = [
   { value: 'light', label: '日间', icon: 'i-lucide-sun' },
   { value: 'system', label: '系统', icon: 'i-lucide-monitor' },
@@ -34,13 +41,15 @@ const modes: Array<{ value: ThemeMode, label: string, icon: string }> = [
     <div class="flex items-center gap-2">
       <button
         v-for="color in colors"
-        :key="color"
+        :key="color.value"
         class="h-7 w-7 grid place-items-center rounded-full transition-transform hover:scale-105"
-        :style="{ background: color }"
-        :aria-label="`使用主题色 ${color}`"
-        @click="accent = color"
+        :style="{ background: color.value }"
+        :title="color.label"
+        :aria-label="`使用${color.label}主题色`"
+        @click="accent = color.value"
       >
-        <span v-if="accent === color" class="i-lucide-check text-sm text-white" />
+        <span v-if="accent === color.value" class="i-lucide-check text-sm text-white" />
+        <span v-else-if="color.value === DEFAULT_ACCENT" class="text-2xs text-white font-700">Y</span>
       </button>
       <label class="relative h-7 w-7 shrink-0 cursor-pointer overflow-hidden rounded-full border border-line bg-surface" title="自定义主题色">
         <span class="i-lucide-plus pointer-events-none absolute inset-0 m-auto text-xs text-muted" />

@@ -54,7 +54,7 @@ onMounted(async () => {
 <template>
   <div class="min-h-screen bg-canvas text-ink md:grid md:grid-cols-[220px_minmax(0,1fr)]">
     <SidebarNav />
-    <main class="min-w-0 px-5 pb-[calc(112px+env(safe-area-inset-bottom,0px))] pt-[calc(env(safe-area-inset-top,0px)+32px)] md:px-9 md:pb-12 md:pt-8 xl:px-12">
+    <main class="min-w-0 px-5 pb-[calc(120px+env(safe-area-inset-bottom,0px))] pt-[calc(env(safe-area-inset-top,0px)+32px)] md:px-9 md:pb-12 md:pt-8 xl:px-12">
       <header class="mx-auto mb-7 hidden max-w-[1120px] items-center justify-between gap-4 md:flex">
         <Transition name="title" mode="out-in">
           <h1 :key="ui.view" class="m-0 text-2xl font-700">

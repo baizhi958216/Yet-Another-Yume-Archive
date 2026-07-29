@@ -2,9 +2,11 @@ import { computed, ref, watch } from 'vue'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 
+export const DEFAULT_ACCENT = '#cf3f7b'
+
 const storedMode = localStorage.getItem('yaya-theme-mode') as ThemeMode | null
 const mode = ref<ThemeMode>(['light', 'dark', 'system'].includes(storedMode || '') ? storedMode! : 'system')
-const accent = ref(normalizeHex(localStorage.getItem('yaya-theme-accent')) || '#10a37f')
+const accent = ref(normalizeHex(localStorage.getItem('yaya-theme-accent')) || DEFAULT_ACCENT)
 const systemDark = ref(matchMedia('(prefers-color-scheme: dark)').matches)
 const resolvedMode = computed(() => mode.value === 'system' ? (systemDark.value ? 'dark' : 'light') : mode.value)
 
@@ -13,7 +15,7 @@ matchMedia('(prefers-color-scheme: dark)')
 
 watch([mode, accent, resolvedMode], () => {
   const root = document.documentElement
-  const normalized = normalizeHex(accent.value) || '#10a37f'
+  const normalized = normalizeHex(accent.value) || DEFAULT_ACCENT
   const rgb = hexToRgb(normalized)
   accent.value = normalized
   root.dataset.theme = resolvedMode.value
