@@ -4,8 +4,7 @@ export default defineConfig({
   presets: [
     presetWind3(),
     presetIcons({
-      // lucide resolves from the local @iconify-json/lucide package; no
-      // network at build time (the esm.sh CDN made builds fail on bad links)
+      cdn: 'https://esm.sh/',
       scale: 1.15,
       extraProperties: {
         'display': 'inline-block',
