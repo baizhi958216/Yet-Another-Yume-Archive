@@ -24,7 +24,7 @@ const items: Array<{ view: ViewName, label: string, icon: string }> = [
         :key="item.view"
         type="button"
         class="nav-item min-w-0 inline-flex flex-col items-center justify-center gap-0.5 px-2 text-2xs transition-all duration-200 active:scale-95 md:h-11 md:flex-row md:justify-start md:gap-3 md:rounded-control md:px-3.5 md:text-sm"
-        :class="ui.view === item.view ? 'text-accent font-600 md:bg-accent-soft' : 'text-muted hover:text-ink md:hover:bg-soft'"
+        :class="ui.view === item.view ? 'nav-item-active text-accent font-600 md:bg-accent-soft' : 'text-muted hover:text-ink md:hover:bg-soft'"
         :aria-current="ui.view === item.view ? 'page' : undefined"
         @click="ui.view = item.view"
       >
@@ -55,7 +55,17 @@ const items: Array<{ view: ViewName, label: string, icon: string }> = [
   }
 
   .nav-item {
+    position: relative;
     border-radius: 18px;
+  }
+
+  .nav-item-active {
+    background:
+      linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--accent) 18%, var(--elevated)),
+        color-mix(in srgb, var(--accent) 9%, var(--elevated))
+      );
   }
 }
 </style>
