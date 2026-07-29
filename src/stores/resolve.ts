@@ -39,6 +39,15 @@ export const useResolveStore = defineStore('resolve', () => {
     }
   }
 
+  function reset() {
+    source.value = ''
+    outputDir.value = ''
+    inspection.value = null
+    selected.value = {}
+    options.value = {}
+    sharedOptions.value = {}
+  }
+
   /** Returns created task ids; throws when nothing is selected. */
   async function create() {
     const view = inspection.value
@@ -73,7 +82,7 @@ export const useResolveStore = defineStore('resolve', () => {
     }
   }
 
-  return { source, outputDir, inspection, selected, options, sharedOptions, resolving, creating, resolve, create }
+  return { source, outputDir, inspection, selected, options, sharedOptions, resolving, creating, resolve, reset, create }
 })
 
 function defaults(fields: FormField[]) {

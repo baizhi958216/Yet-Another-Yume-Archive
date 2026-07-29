@@ -41,12 +41,30 @@ async function chooseFolder() {
   if (typeof chosen === 'string')
     outputDir.value = chosen
 }
+
+function resetSearch() {
+  ui.clearError()
+  resolve.reset()
+}
 </script>
 
 <template>
   <section>
-    <div class="grid grid-cols-[20px_minmax(0,1fr)_auto] items-center gap-3 rounded-panel bg-elevated p-2 pl-5 shadow-raised transition-all duration-200 focus-within:ring-3 focus-within:ring-accent-ring">
-      <span class="i-lucide-link-2 text-lg text-muted" />
+    <div
+      class="grid items-center gap-3 rounded-panel bg-elevated p-2 shadow-raised transition-all duration-200 focus-within:ring-3 focus-within:ring-accent-ring"
+      :class="inspection ? 'grid-cols-[40px_minmax(0,1fr)_auto] pl-2' : 'grid-cols-[20px_minmax(0,1fr)_auto] pl-5'"
+    >
+      <button
+        v-if="inspection"
+        type="button"
+        class="h-10 w-10 grid place-items-center rounded-control text-muted transition-colors hover:bg-soft hover:text-ink active:scale-95"
+        title="清空搜索结果"
+        aria-label="清空搜索结果"
+        @click="resetSearch"
+      >
+        <span class="i-lucide-arrow-left text-xl" />
+      </button>
+      <span v-else class="i-lucide-link-2 text-lg text-muted" />
       <input v-model="source" class="h-10 min-w-0 border-0 bg-transparent text-sm text-ink outline-none placeholder:text-muted" placeholder="输入要下载的地址或标识" @keyup.enter="doResolve">
       <button class="primary-btn min-w-[88px]" :disabled="resolving || !source" @click="doResolve">
         <span v-if="resolving" class="i-lucide-loader-circle animate-spin" />
