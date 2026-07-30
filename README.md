@@ -246,10 +246,18 @@ cargo clippy --workspace --all-targets -- -D warnings
 - macOS（Apple Silicon 与 Intel）
 - Linux
 - Windows
-- Android APK/AAB
-- macOS、Linux、Windows 的 Web 主机包
+- Android APK
 
-额外 Provider、私有仓库访问和 Android 签名均通过可选 CI Secret 注入；没有这些 Secret 时仍会发布只包含 Direct Provider 的版本。
+所有构建成功后，workflow 会汇总产物、生成 `SHA256SUMS.txt` 并创建或更新对应的 GitHub Release。推送 `v*` 标签时使用该标签；手动触发时必须填写 Release tag。
+
+额外 Provider、私有仓库访问和平台签名均通过可选 GitHub Actions Secret 注入：
+
+- Provider：`PROVIDERS_REPO`、`PROVIDERS_GIT_TOKEN`、`BUNDLE_CONFIG_JSON`
+- Android：`ANDROID_KEYSTORE_B64`、`ANDROID_KEYSTORE_PASSWORD`、`ANDROID_KEY_ALIAS`，key 密码不同时另设 `ANDROID_KEY_PASSWORD`
+- macOS Developer ID 签名：`APPLE_CERTIFICATE`、`APPLE_CERTIFICATE_PASSWORD`、`APPLE_SIGNING_IDENTITY`、`KEYCHAIN_PASSWORD`
+- macOS 公证：`APPLE_API_ISSUER`、`APPLE_API_KEY`、`APPLE_API_KEY_B64`
+
+没有 Provider Secret 时仍会发布只包含 Direct Provider 的版本。Android 未配置签名时产物不带 release 签名；macOS 未配置完整签名和公证 Secret 时回退到 ad-hoc 签名。Secret 的生成方式、证书类型和平台要求见 [Release 签名配置](docs/release-signing.md)。
 
 ## 许可证
 
