@@ -28,13 +28,20 @@ pub(crate) fn router() -> Router<Arc<WebState>> {
         .route("/providers/{id}/enabled", post(providers::set_enabled))
         .route("/providers/{id}/asset", get(input::provider_asset))
         .route(
-            "/providers/{id}/auth/qr/start",
-            post(providers::auth_qr_start),
+            "/providers/{id}/auth/describe",
+            get(providers::auth_describe),
+        )
+        .route("/providers/{id}/auth/actions", post(providers::auth_invoke))
+        .route(
+            "/providers/{id}/settings/describe",
+            get(providers::settings_describe),
         )
         .route(
-            "/providers/{id}/auth/qr/poll",
-            post(providers::auth_qr_poll),
+            "/providers/{id}/settings",
+            get(providers::settings_get).put(providers::settings_update),
         )
-        .route("/providers/{id}/auth/status", get(providers::auth_status))
-        .route("/providers/{id}/auth/logout", post(providers::auth_logout))
+        .route(
+            "/providers/{id}/settings/actions",
+            post(providers::settings_invoke),
+        )
 }

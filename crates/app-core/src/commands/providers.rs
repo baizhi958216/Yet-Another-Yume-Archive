@@ -1,33 +1,13 @@
-//! Provider management and the auth control-plane passthrough. Only the
-//! closed set of auth methods from the protocol doc is forwarded.
+//! Provider management and typed control-plane passthrough for Provider-owned
+//! authentication and settings.
 
-use serde::{Deserialize, Serialize};
+use yaya_provider_api::{
+    ProviderAuthActionRequest, ProviderAuthPage, ProviderSettingsActionRequest,
+    ProviderSettingsActionResult, ProviderSettingsState, ProviderSettingsView,
+};
 use yaya_provider_host::ProviderInfo;
 
 use crate::{AppCore, AppError};
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct AuthQrSession {
-    pub key: String,
-    pub url: String,
-    #[serde(default)]
-    pub expires_in_sec: u64,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct AuthQrPoll {
-    pub status: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct AuthStatus {
-    pub logged_in: bool,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub user: Option<serde_json::Value>,
-}
 
 impl AppCore {
     pub fn list_providers(&self) -> Vec<ProviderInfo> {
@@ -38,29 +18,52 @@ impl AppCore {
         Ok(self.providers.set_enabled(id, enabled)?)
     }
 
-    pub async fn provider_auth_qr_start(&self, id: &str) -> Result<AuthQrSession, AppError> {
-        self.auth_invoke(id, "auth_qr_start", serde_json::json!({}))
+    pub async fn provider_auth_describe(&self, id: &str) -> Result<ProviderAuthPage, AppError> {
+        self.provider_invoke(id, "auth_describe", serde_json::json!({}))
             .await
     }
 
-    pub async fn provider_auth_qr_poll(&self, id: &str, key: &str) -> Result<AuthQrPoll, AppError> {
-        self.auth_invoke(id, "auth_qr_poll", serde_json::json!({ "key": key }))
+    pub async fn provider_auth_invoke(
+        &self,
+        id: &str,
+        request: ProviderAuthActionRequest,
+    ) -> Result<serde_json::Value, AppError> {
+        let params = serde_json::to_value(request).map_err(AppError::internal)?;
+        self.provider_invoke(id, "auth_invoke", params).await
+    }
+
+    pub async fn provider_settings_describe(
+        &self,
+        id: &str,
+    ) -> Result<ProviderSettingsView, AppError> {
+        self.provider_invoke(id, "settings_describe", serde_json::json!({}))
             .await
     }
 
-    pub async fn provider_auth_status(&self, id: &str) -> Result<AuthStatus, AppError> {
-        self.auth_invoke(id, "auth_status", serde_json::json!({}))
+    pub async fn provider_settings_get(&self, id: &str) -> Result<ProviderSettingsState, AppError> {
+        self.provider_invoke(id, "settings_get", serde_json::json!({}))
             .await
     }
 
-    pub async fn provider_auth_logout(&self, id: &str) -> Result<(), AppError> {
-        let _: serde_json::Value = self
-            .auth_invoke(id, "auth_logout", serde_json::json!({}))
-            .await?;
-        Ok(())
+    pub async fn provider_settings_update(
+        &self,
+        id: &str,
+        state: ProviderSettingsState,
+    ) -> Result<ProviderSettingsState, AppError> {
+        let params = serde_json::to_value(state).map_err(AppError::internal)?;
+        self.provider_invoke(id, "settings_update", params).await
     }
 
-    async fn auth_invoke<T: serde::de::DeserializeOwned>(
+    pub async fn provider_settings_invoke(
+        &self,
+        id: &str,
+        request: ProviderSettingsActionRequest,
+    ) -> Result<ProviderSettingsActionResult, AppError> {
+        let params = serde_json::to_value(request).map_err(AppError::internal)?;
+        self.provider_invoke(id, "settings_invoke", params).await
+    }
+
+    async fn provider_invoke<T: serde::de::DeserializeOwned>(
         &self,
         id: &str,
         method: &str,

@@ -71,10 +71,12 @@ pub fn run() {
             commands::settings::update_settings,
             commands::providers::list_providers,
             commands::providers::set_provider_enabled,
-            commands::providers::provider_auth_qr_start,
-            commands::providers::provider_auth_qr_poll,
-            commands::providers::provider_auth_status,
-            commands::providers::provider_auth_logout,
+            commands::providers::provider_auth_describe,
+            commands::providers::provider_auth_invoke,
+            commands::providers::provider_settings_describe,
+            commands::providers::provider_settings_get,
+            commands::providers::provider_settings_update,
+            commands::providers::provider_settings_invoke,
         ])
         .run(tauri::generate_context!())
         .expect("error while running yaya");

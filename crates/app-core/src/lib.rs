@@ -7,7 +7,6 @@ mod error;
 mod settings;
 mod state;
 
-pub use commands::providers::{AuthQrPoll, AuthQrSession, AuthStatus};
 pub use error::AppError;
 pub use settings::AppSettings;
 pub use state::{AppCore, AppPaths};
