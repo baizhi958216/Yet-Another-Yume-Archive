@@ -30,6 +30,12 @@ pub enum FormControl {
         #[serde(default)]
         placeholder: String,
     },
+    Secret {
+        #[serde(default)]
+        default: String,
+        #[serde(default)]
+        placeholder: String,
+    },
     Number {
         default: f64,
         min: Option<f64>,

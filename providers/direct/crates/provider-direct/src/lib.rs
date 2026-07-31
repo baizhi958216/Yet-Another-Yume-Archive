@@ -197,6 +197,7 @@ impl ProviderControl for DirectProvider {
             description: "下载 HTTP 或 HTTPS 地址指向的内容。".into(),
             capabilities: ProviderCapabilities {
                 authentication: false,
+                settings: false,
             },
             enabled_by_default: true,
         }

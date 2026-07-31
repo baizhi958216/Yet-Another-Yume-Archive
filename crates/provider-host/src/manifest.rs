@@ -34,6 +34,8 @@ const fn default_enabled() -> bool {
 pub struct ProviderCapabilities {
     #[serde(default)]
     pub authentication: bool,
+    #[serde(default)]
+    pub settings: bool,
 }
 
 /// Host-facing summary shown in the providers UI.

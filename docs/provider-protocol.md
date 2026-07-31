@@ -90,15 +90,18 @@ Host 会跳过以下包：
 | `priority` | integer | 否 | `0` | 多个 Provider 匹配时数值高者优先 |
 | `executables` | object | 是 | — | 目标三元组到候选相对路径数组的映射 |
 
-`capabilities` 当前只有一个字段：
+`capabilities` 当前支持：
 
 ```json
 {
-  "authentication": true
+  "authentication": true,
+  "settings": true
 }
 ```
 
-`authentication` 缺省为 `false`。设为 `true` 表示 Provider 实现第 7 节的四个认证方法。
+`authentication` 缺省为 `false`。设为 `true` 表示 Provider 实现第 7 节的认证页面与 opaque action 方法。认证 UI 和逻辑完全属于 Provider，Host 不区分二维码、OAuth2、Cookie、Token 或 2FA。
+
+`settings` 缺省为 `false`。设为 `true` 表示 Provider 实现第 8 节的设置描述、读取、保存和操作方法。字段、状态、按钮及可选自定义页面均由 Provider 声明，Host 不包含具体 Provider 的设置逻辑。
 
 Host 支持以下目标键：
 
@@ -179,7 +182,7 @@ Host 在 stdin 写入一条 UTF-8 JSON，并追加 `\n`：
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
 | `protocolVersion` | `u32` | 当前为 `1` |
-| `method` | string | 第 6、7 节定义的方法名 |
+| `method` | string | 第 6、7、8 节定义的方法名 |
 | `params` | JSON value | 对应方法参数 |
 
 不支持协议版本时返回 `unsupported_protocol`；方法未知时返回 `unsupported_method`；参数不能反序列化时返回 `invalid_params`。
@@ -388,6 +391,18 @@ Number：
 
 `default` 必需；`min`、`max`、`step` 可省略或为 `null`。
 
+设置表单还可使用 `secret`，结构与 `text` 相同，但 Host 必须按密码输入框渲染：
+
+```json
+{
+  "key": "token",
+  "label": "访问令牌",
+  "type": "secret",
+  "default": "",
+  "placeholder": "输入令牌"
+}
+```
+
 Host 把用户答案以 `FormField.key` 为键放入任务的 `options`。Provider 必须自行验证值类型、范围和仍然有效的 Select 选项，不能信任 Host 输入。
 
 ### 4.5 ProviderTaskRequest
@@ -579,123 +594,228 @@ Host 会把结果中的 `provider` 覆盖为实际 Provider ID。
 
 第三方 Provider 可以为调试实现 `describe`，但它不是 protocol v1 的必需方法，也不能替代 `provider.json`。
 
-## 7. 认证方法
+## 7. Provider 认证
 
-只有 Manifest 声明：
+Manifest 声明 `"authentication": true` 时，Provider 必须实现本节两个方法。认证表单、UI、步骤、轮询和状态机全部由 Provider 页面实现；Host 不渲染认证字段，也不理解二维码、OAuth2、Cookie、Token 或 2FA。
+
+### 7.1 `auth_describe`
+
+参数为 `{}`，结果是 Provider 自带的完整认证页面：
 
 ```json
 {
-  "capabilities": {
-    "authentication": true
+  "html": "<main>...</main><script>...</script>",
+  "height": 480
+}
+```
+
+Host 把 HTML 放入无同源权限的沙箱 iframe，并注入禁止网络连接、表单提交、外部资源和子框架的 CSP。页面必须内联所需 CSS/JS；二维码、表单组件和认证流程代码都属于 Provider 发布物。OAuth 页面可用带 `target="_blank"` 和 `rel="noreferrer"` 的普通链接打开外部授权页；沙箱只允许弹出窗口逃逸，不赋予认证页面同源或顶层导航权限。
+
+### 7.2 `auth_invoke`
+
+认证页面只能通过 `postMessage` bridge 请求 Provider 操作：
+
+```json
+{
+  "channel": "yaya-provider-auth",
+  "version": 1,
+  "type": "invoke",
+  "requestId": "1",
+  "action": "verify_2fa",
+  "payload": {
+    "code": "123456",
+    "flowId": "opaque-id"
   }
 }
 ```
 
-时才应实现本节方法。每次认证调用仍会启动独立进程，状态必须持久化到 `YAYA_PROVIDER_DATA_DIR`。
-
-### 7.1 `auth_qr_start`
-
-参数：
+Host 将 `action` 和 opaque `payload` 传给 `auth_invoke`：
 
 ```json
-{}
+{
+  "action": "verify_2fa",
+  "payload": {
+    "code": "123456",
+    "flowId": "opaque-id"
+  }
+}
+```
+
+结果是 Provider 定义的任意 JSON。Host 不读取其内容，只通过 bridge 返回页面：
+
+```json
+{
+  "state": "waiting_for_2fa",
+  "message": "验证码错误"
+}
+```
+
+bridge 响应格式为 `{ channel, version, type: "response", requestId, ok, result }`；失败时使用 `error`。Provider 页面自行处理结果、渲染下一步和安排轮询。Provider 必须验证所有 action/payload，长期凭据和真正的认证状态只能保存在 `YAYA_PROVIDER_DATA_DIR`，不得放入返回给页面的 payload。
+
+页面内容高度改变时可发送 `{ channel, version, type: "resize", height }`。Host 只接受有限数值并约束在 96–800px；这不会开放其他宿主能力。
+
+认证页面与第 8.5 节的复杂设置页面共用同一个通用沙箱运行时；Host 不为认证或设置维护独立 iframe 实现，只通过 channel 和受限 handler 配置区分 bridge。
+
+## 8. Provider 设置
+
+Manifest 声明 `"settings": true` 时，Provider 通过统一协议完整控制自己的设置。Host 只认识字段、状态、操作和沙箱 bridge，不解释 FFmpeg、BT、代理、镜像等 Provider 私有概念。
+
+### 8.1 `settings_describe`
+
+返回设置页结构。普通设置由 Host 通用渲染：
+
+```json
+{
+  "sections": [
+    {
+      "key": "network",
+      "title": "网络",
+      "description": "仅影响当前 Provider",
+      "fields": [
+        {
+          "key": "proxy",
+          "label": "代理地址",
+          "description": "",
+          "type": "text",
+          "default": "",
+          "placeholder": "http://127.0.0.1:7890"
+        }
+      ],
+      "statuses": [
+        {
+          "key": "runtime",
+          "label": "运行环境",
+          "available": true,
+          "value": "可用",
+          "description": "已找到所需组件"
+        }
+      ],
+      "actions": [
+        {
+          "key": "test_proxy",
+          "label": "测试连接",
+          "description": "",
+          "style": "secondary"
+        }
+      ]
+    }
+  ]
+}
+```
+
+`sections`、`fields`、`statuses` 和 `actions` 缺省为 `[]`。各层 `key` 在所属视图内必须稳定且唯一。状态的 `label`、`available` 和 `value` 必需；操作 `style` 可为 `primary`、`secondary` 或 `danger`，缺省为 `secondary`。
+
+### 8.2 `settings_get`
+
+返回当前字段值：
+
+```json
+{
+  "values": {
+    "proxy": "http://127.0.0.1:7890"
+  }
+}
+```
+
+未保存的字段可以省略，Host 使用 `settings_describe` 中的 `default` 展示。Provider 不应把 `secret` 字段的明文值返回给 Host；可以返回空字符串或掩码，并自行定义空值在保存时代表“保持原值”还是“清空”。
+
+### 8.3 `settings_update`
+
+参数与结果均为 `ProviderSettingsState`：
+
+```json
+{
+  "values": {
+    "proxy": "http://127.0.0.1:7890"
+  }
+}
+```
+
+Provider 必须验证全部键和值，只持久化自己声明并接受的内容，并返回保存后的安全状态。Host 的字段过滤不是安全边界。
+
+### 8.4 `settings_invoke`
+
+执行 Provider 声明的操作：
+
+```json
+{
+  "action": "test_proxy",
+  "values": {
+    "proxy": "http://127.0.0.1:7890"
+  }
+}
 ```
 
 结果：
 
 ```json
 {
-  "key": "provider-session-key",
-  "url": "https://example.com/qr-login",
-  "expiresInSec": 180
+  "message": "连接成功",
+  "refresh": true
 }
 ```
 
-| 字段 | 类型 | 必需 | 默认值 |
-| --- | --- | --- | --- |
-| `key` | string | 是 | — |
-| `url` | string | 是 | — |
-| `expiresInSec` | number | 否 | `0` |
+`message` 缺省为空；`refresh` 为 `true` 时 Host 重新调用 `settings_describe` 和 `settings_get`。Provider 必须拒绝未声明或不支持的操作。
 
-`url` 是 Host 用于生成二维码的内容，既可以是登录 URL，也可以是 Provider 定义的二维码文本。
+### 8.5 自定义沙箱页面
 
-### 7.2 `auth_qr_poll`
-
-参数：
+复杂设置可在 `settings_describe` 中同时返回 `customPage`：
 
 ```json
 {
-  "key": "provider-session-key"
-}
-```
-
-结果：
-
-```json
-{
-  "status": "pending"
-}
-```
-
-当前前端识别以下状态：
-
-- `pending`：等待扫码
-- `scanned`：已扫码，等待确认
-- `confirmed`：认证完成
-- `expired`：二维码或会话失效
-
-认证完成前 Host 会重复调用此方法，因此会产生多个独立进程。
-
-### 7.3 `auth_status`
-
-参数：
-
-```json
-{}
-```
-
-未登录结果：
-
-```json
-{
-  "loggedIn": false
-}
-```
-
-已登录结果：
-
-```json
-{
-  "loggedIn": true,
-  "user": {
-    "name": "Example User",
-    "avatarUrl": "https://example.com/avatar.png",
-    "badge": "Premium"
+  "sections": [
+    {
+      "key": "advanced",
+      "title": "高级设置",
+      "fields": [
+        {
+          "key": "proxy",
+          "label": "代理地址",
+          "type": "text",
+          "default": "",
+          "placeholder": ""
+        }
+      ],
+      "statuses": [],
+      "actions": [
+        {
+          "key": "test_proxy",
+          "label": "测试",
+          "style": "secondary"
+        }
+      ]
+    }
+  ],
+  "customPage": {
+    "height": 480,
+    "html": "<main>...</main><script>...</script>"
   }
 }
 ```
 
-`loggedIn` 必需；`user` 可省略。Host 不强制 `user` 的内部结构，但当前界面使用可选的 `name`、`avatarUrl` 和 `badge`。
-
-### 7.4 `auth_logout`
-
-参数：
+即使使用自定义页面，页面可访问的字段和操作也必须在 `sections` 中声明。Host 在无同源权限的 `sandbox=\"allow-scripts\"` iframe 中加载 HTML，注入禁止网络连接、表单提交、子框架、外部资源和顶层导航的 CSP，并仅开放以下 `postMessage` bridge：
 
 ```json
-{}
+{"channel":"yaya-provider-settings","version":1,"type":"get","requestId":"1"}
+{"channel":"yaya-provider-settings","version":1,"type":"update","requestId":"2","values":{"proxy":"..."}}
+{"channel":"yaya-provider-settings","version":1,"type":"invoke","requestId":"3","action":"test_proxy","values":{"proxy":"..."}}
 ```
 
-Provider 删除自己保存的认证凭据，并返回非空成功值：
+iframe 加载完成后 Host 主动发送当前状态，避免页面启动时序竞态：
 
 ```json
-{
-  "result": {}
-}
+{"channel":"yaya-provider-settings","version":1,"type":"init","result":{"values":{}}}
 ```
 
-退出登录不应删除与认证无关的设置或缓存。
+页面也可以主动发送 `ready` 或 `get`，两者等价。Host 的响应为：
 
-## 8. 最小外部 Provider 示例
+```json
+{"channel":"yaya-provider-settings","version":1,"type":"response","requestId":"1","ok":true,"result":{"values":{}}}
+```
+
+失败时 `ok` 为 `false` 并带 `error` 字符串。由于沙箱页面是 opaque origin，双方发送消息时使用通配目标 origin；Host 必须校验消息来源确为当前 iframe、协议 channel/version、声明过的字段和操作。页面不得依赖外部脚本、样式或网络资源。
+
+## 9. 最小外部 Provider 示例
 
 `provider.json`：
 
@@ -709,7 +829,8 @@ Provider 删除自己保存的认证凭据，并返回非空成功值：
   "enabledByDefault": true,
   "priority": 10,
   "capabilities": {
-    "authentication": false
+    "authentication": false,
+    "settings": false
   },
   "matches": [
     {
@@ -745,7 +866,7 @@ stdout ← {"result":[{"path":"/downloads/item-1.bin","name":"item-1.bin","mimeT
 exit   ← 0
 ```
 
-## 9. 兼容性检查清单
+## 10. 兼容性检查清单
 
 发布 Provider 前确认：
 
@@ -760,6 +881,8 @@ exit   ← 0
 - 进程被强制终止后不会留下损坏的最终文件，并能按需要恢复。
 - 凭据只写入 `YAYA_PROVIDER_DATA_DIR`，stdout/stderr 不泄露秘密。
 - 远程图片需要展示时实现 `fetch_asset`。
-- 声明认证能力时四个认证方法均符合本节结果格式。
+- 声明认证能力时 `auth_describe` 和 `auth_invoke` 符合第 7 节，Host 无需理解具体认证方式。
+- 声明设置能力时四个设置方法符合第 8 节；所有字段、状态和操作 key 稳定且不含秘密。
+- 自定义设置页面只通过受限 bridge 访问已声明字段和操作，且不依赖网络或外部资源。
 
 协议模型的 Rust 定义位于 `crates/provider-api`，传输实现位于 `crates/provider-host`。当实现与本文档不一致时，应把它视为兼容性问题并同时修正文档和模型。
