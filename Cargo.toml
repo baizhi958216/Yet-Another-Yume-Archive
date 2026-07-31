@@ -10,8 +10,8 @@ members = [
   "src-tauri",
   "src-web",
 ]
-# providers/direct is its own workspace (independent release unit)
-exclude = ["providers/direct"]
+# Provider source checkouts are independent workspaces (independent release units).
+exclude = ["providers/direct", "providers/yaya-provider-bilibili"]
 
 [workspace.package]
 version = "0.1.0"
