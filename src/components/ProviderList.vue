@@ -44,7 +44,7 @@ const emit = defineEmits<{
           </p>
         </div>
         <div class="flex items-center gap-2">
-          <button v-if="provider.capabilities.authentication" class="icon-btn" :disabled="!provider.enabled" :title="`${provider.name} 设置`" @click="emit('settings', provider)">
+          <button v-if="provider.capabilities.authentication || provider.capabilities.settings" class="icon-btn" :disabled="!provider.enabled" :title="`${provider.name} 设置`" @click="emit('settings', provider)">
             <span class="i-lucide-settings-2" />
           </button>
           <label class="relative h-6 w-11 shrink-0 cursor-pointer" :title="provider.enabled ? '停用插件' : '启用插件'">

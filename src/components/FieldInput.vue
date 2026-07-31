@@ -42,11 +42,11 @@ function onInput(event: Event) {
   />
   <input
     v-else
-    :type="field.type"
+    :type="field.type === 'secret' ? 'password' : field.type"
     class="field h-9 text-xs"
     :disabled="disabled"
     :value="modelValue as string | number"
-    :placeholder="field.type === 'text' ? field.placeholder : undefined"
+    :placeholder="field.type === 'text' || field.type === 'secret' ? field.placeholder : undefined"
     :min="field.type === 'number' ? field.min : undefined"
     :max="field.type === 'number' ? field.max : undefined"
     :step="field.type === 'number' ? field.step : undefined"

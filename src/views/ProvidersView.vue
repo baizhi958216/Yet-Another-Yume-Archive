@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { ProviderInfo } from '../types'
 import { ref } from 'vue'
-import LoginModal from '../components/LoginModal.vue'
 import ProviderList from '../components/ProviderList.vue'
 import ProviderSettingsContent from '../components/ProviderSettingsContent.vue'
 import { useProvidersStore } from '../stores/providers'
@@ -10,7 +9,6 @@ import { useUiStore } from '../stores/ui'
 const providers = useProvidersStore()
 const ui = useUiStore()
 const settingsProvider = ref<ProviderInfo | null>(null)
-const authenticating = ref<ProviderInfo | null>(null)
 const changing = ref<string[]>([])
 const mobileTransition = ref('mobile-forward')
 
@@ -34,8 +32,10 @@ async function toggle(provider: ProviderInfo, event: Event) {
 async function openSettings(provider: ProviderInfo) {
   mobileTransition.value = 'mobile-forward'
   settingsProvider.value = provider
-  if (provider.capabilities.authentication)
-    await providers.refreshAuth(provider.id)
+  await Promise.all([
+    provider.capabilities.authentication ? providers.refreshAuth(provider.id) : Promise.resolve(),
+    provider.capabilities.settings ? providers.refreshSettings(provider.id) : Promise.resolve(),
+  ])
 }
 
 function closeSettings() {
@@ -43,10 +43,6 @@ function closeSettings() {
   settingsProvider.value = null
 }
 
-async function authenticated(provider: ProviderInfo) {
-  await providers.refreshAuth(provider.id)
-  authenticating.value = null
-}
 </script>
 
 <template>
@@ -62,8 +58,8 @@ async function authenticated(provider: ProviderInfo) {
         <ProviderSettingsContent
           :provider="settingsProvider"
           :auth="providers.auth[settingsProvider.id]"
-          @login="authenticating = settingsProvider"
-          @logout="providers.logout(settingsProvider.id)"
+          :settings-view="providers.settingsViews[settingsProvider.id]"
+          :settings-state="providers.settingsStates[settingsProvider.id]"
         />
       </section>
       <ProviderList
@@ -97,21 +93,12 @@ async function authenticated(provider: ProviderInfo) {
           <ProviderSettingsContent
             :provider="settingsProvider"
             :auth="providers.auth[settingsProvider.id]"
-            @login="authenticating = settingsProvider"
-            @logout="providers.logout(settingsProvider.id)"
+            :settings-view="providers.settingsViews[settingsProvider.id]"
+            :settings-state="providers.settingsStates[settingsProvider.id]"
           />
         </section>
       </div>
     </Transition>
 
-    <Transition name="modal">
-      <LoginModal
-        v-if="authenticating"
-        :provider-id="authenticating.id"
-        :provider-name="authenticating.name"
-        @authenticated="authenticated(authenticating)"
-        @close="authenticating = null"
-      />
-    </Transition>
   </div>
 </template>

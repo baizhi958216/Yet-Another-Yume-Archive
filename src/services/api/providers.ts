@@ -1,4 +1,12 @@
-import type { AuthQrPoll, AuthQrSession, AuthStatus, ProviderInfo } from '../../types'
+import type {
+  ProviderAuthActionRequest,
+  ProviderAuthPage,
+  ProviderInfo,
+  ProviderSettingsActionRequest,
+  ProviderSettingsActionResult,
+  ProviderSettingsState,
+  ProviderSettingsView,
+} from '../../types'
 import { transport } from '../transport'
 
 export function listProviders() {
@@ -14,37 +22,53 @@ export function setProviderEnabled(id: string, enabled: boolean) {
   )
 }
 
-export function authQrStart(providerId: string) {
-  return transport<AuthQrSession>(
-    'provider_auth_qr_start',
+export function authDescribe(providerId: string) {
+  return transport<ProviderAuthPage>(
+    'provider_auth_describe',
     { providerId },
-    `/providers/${encodeURIComponent(providerId)}/auth/qr/start`,
-    { method: 'POST' },
+    `/providers/${encodeURIComponent(providerId)}/auth/describe`,
   )
 }
 
-export function authQrPoll(providerId: string, key: string) {
-  return transport<AuthQrPoll>(
-    'provider_auth_qr_poll',
-    { providerId, key },
-    `/providers/${encodeURIComponent(providerId)}/auth/qr/poll`,
-    { method: 'POST', body: JSON.stringify({ key }) },
+export function authInvoke(providerId: string, request: ProviderAuthActionRequest) {
+  return transport<unknown>(
+    'provider_auth_invoke',
+    { providerId, request },
+    `/providers/${encodeURIComponent(providerId)}/auth/actions`,
+    { method: 'POST', body: JSON.stringify(request) },
   )
 }
 
-export function authStatus(providerId: string) {
-  return transport<AuthStatus>(
-    'provider_auth_status',
+export function settingsDescribe(providerId: string) {
+  return transport<ProviderSettingsView>(
+    'provider_settings_describe',
     { providerId },
-    `/providers/${encodeURIComponent(providerId)}/auth/status`,
+    `/providers/${encodeURIComponent(providerId)}/settings/describe`,
   )
 }
 
-export function authLogout(providerId: string) {
-  return transport<void>(
-    'provider_auth_logout',
+export function settingsGet(providerId: string) {
+  return transport<ProviderSettingsState>(
+    'provider_settings_get',
     { providerId },
-    `/providers/${encodeURIComponent(providerId)}/auth/logout`,
-    { method: 'POST' },
+    `/providers/${encodeURIComponent(providerId)}/settings`,
+  )
+}
+
+export function settingsUpdate(providerId: string, state: ProviderSettingsState) {
+  return transport<ProviderSettingsState>(
+    'provider_settings_update',
+    { providerId, state },
+    `/providers/${encodeURIComponent(providerId)}/settings`,
+    { method: 'PUT', body: JSON.stringify(state) },
+  )
+}
+
+export function settingsInvoke(providerId: string, request: ProviderSettingsActionRequest) {
+  return transport<ProviderSettingsActionResult>(
+    'provider_settings_invoke',
+    { providerId, request },
+    `/providers/${encodeURIComponent(providerId)}/settings/actions`,
+    { method: 'POST', body: JSON.stringify(request) },
   )
 }

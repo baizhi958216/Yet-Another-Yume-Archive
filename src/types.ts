@@ -16,6 +16,7 @@ export type FormField =
   | { key: string, label: string, description?: string, type: 'toggle', default: boolean }
   | { key: string, label: string, description?: string, type: 'select', options: SelectOption[], default: unknown }
   | { key: string, label: string, description?: string, type: 'text', default: string, placeholder?: string }
+  | { key: string, label: string, description?: string, type: 'secret', default: string, placeholder?: string }
   | { key: string, label: string, description?: string, type: 'number', default: number, min?: number, max?: number, step?: number }
 
 export interface TaskDraft {
@@ -94,28 +95,66 @@ export interface ProviderInfo {
   enabled: boolean
   capabilities: {
     authentication: boolean
+    settings: boolean
   }
 }
 
-export interface AuthQrSession {
+export interface ProviderAuthPage {
+  html: string
+  height: number
+}
+
+export interface ProviderAuthActionRequest {
+  action: string
+  payload: unknown
+}
+
+export interface ProviderSettingStatus {
   key: string
-  url: string
-  expiresInSec: number
+  label: string
+  available: boolean
+  value: string
+  description: string
 }
 
-export interface AuthQrPoll {
-  status: 'pending' | 'scanned' | 'confirmed' | 'expired'
+export interface ProviderSettingAction {
+  key: string
+  label: string
+  description: string
+  style: 'primary' | 'secondary' | 'danger'
 }
 
-export interface AuthUser {
-  name?: string
-  avatarUrl?: string
-  badge?: string
+export interface ProviderSettingsSection {
+  key: string
+  title: string
+  description: string
+  fields: FormField[]
+  statuses: ProviderSettingStatus[]
+  actions: ProviderSettingAction[]
 }
 
-export interface AuthStatus {
-  loggedIn: boolean
-  user?: AuthUser
+export interface ProviderSettingsPage {
+  html: string
+  height: number
+}
+
+export interface ProviderSettingsView {
+  sections: ProviderSettingsSection[]
+  customPage?: ProviderSettingsPage
+}
+
+export interface ProviderSettingsState {
+  values: Record<string, unknown>
+}
+
+export interface ProviderSettingsActionRequest {
+  action: string
+  values: Record<string, unknown>
+}
+
+export interface ProviderSettingsActionResult {
+  message: string
+  refresh: boolean
 }
 
 export interface BinaryAsset {
