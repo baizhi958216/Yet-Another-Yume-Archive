@@ -628,7 +628,7 @@ dependencies = [
 
 [[package]]
 name = "provider-direct"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "mime_guess",
@@ -1418,7 +1418,7 @@ checksum = "1ffae5123b2d3fc086436f8834ae3ab053a283cfac8fe0a0b8eaae044768a4c4"
 
 [[package]]
 name = "yaya-download-engine"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "bytes",
  "futures-util",
@@ -1432,7 +1432,7 @@ dependencies = [
 
 [[package]]
 name = "yaya-provider-api"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "base64",
@@ -1444,7 +1444,7 @@ dependencies = [
 
 [[package]]
 name = "yaya-provider-host"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "serde",
