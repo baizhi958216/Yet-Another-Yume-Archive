@@ -7,6 +7,7 @@ import { ref } from 'vue'
 import { inspectSource } from '../services/api/input'
 import * as tasksApi from '../services/api/tasks'
 import { isDesktop } from '../services/transport'
+import { useProvidersStore } from './providers'
 import { useTasksStore } from './tasks'
 
 export const useResolveStore = defineStore('resolve', () => {
@@ -29,6 +30,8 @@ export const useResolveStore = defineStore('resolve', () => {
       selected.value = Object.fromEntries(view.tasks.map(task => [task.key, task.selected]))
       options.value = Object.fromEntries(view.tasks.map(task => [task.key, defaults(task.fields)]))
       sharedOptions.value = defaults(view.fields)
+      const providers = useProvidersStore()
+      await providers.loadUiBundle(view.provider)
     }
     catch (error) {
       inspection.value = null
@@ -46,6 +49,39 @@ export const useResolveStore = defineStore('resolve', () => {
     selected.value = {}
     options.value = {}
     sharedOptions.value = {}
+  }
+
+  function applyUiState(value: unknown) {
+    const view = inspection.value
+    if (!view || !value || typeof value !== 'object' || Array.isArray(value))
+      return
+    const state = value as Record<string, unknown>
+    const taskKeys = new Set(view.tasks.map(task => task.key))
+    if (state.selected && typeof state.selected === 'object' && !Array.isArray(state.selected)) {
+      for (const [key, entry] of Object.entries(state.selected as Record<string, unknown>)) {
+        if (taskKeys.has(key) && typeof entry === 'boolean')
+          selected.value[key] = entry
+      }
+    }
+    if (state.sharedOptions && typeof state.sharedOptions === 'object' && !Array.isArray(state.sharedOptions)) {
+      const allowed = new Set(view.fields.map(field => field.key))
+      for (const [key, entry] of Object.entries(state.sharedOptions as Record<string, unknown>)) {
+        if (allowed.has(key))
+          sharedOptions.value[key] = entry
+      }
+    }
+    if (state.options && typeof state.options === 'object' && !Array.isArray(state.options)) {
+      for (const [taskKey, entries] of Object.entries(state.options as Record<string, unknown>)) {
+        if (!taskKeys.has(taskKey) || !entries || typeof entries !== 'object' || Array.isArray(entries))
+          continue
+        const task = view.tasks.find(value => value.key === taskKey)
+        const allowed = new Set(task?.fields.map(field => field.key) ?? [])
+        for (const [key, entry] of Object.entries(entries as Record<string, unknown>)) {
+          if (allowed.has(key))
+            options.value[taskKey][key] = entry
+        }
+      }
+    }
   }
 
   /** Returns created task ids; throws when nothing is selected. */
@@ -82,7 +118,7 @@ export const useResolveStore = defineStore('resolve', () => {
     }
   }
 
-  return { source, outputDir, inspection, selected, options, sharedOptions, resolving, creating, resolve, reset, create }
+  return { source, outputDir, inspection, selected, options, sharedOptions, resolving, creating, resolve, reset, applyUiState, create }
 })
 
 function defaults(fields: FormField[]) {

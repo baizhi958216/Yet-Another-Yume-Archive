@@ -1,10 +1,10 @@
-export type TaskStatus =
-  | 'queued'
-  | 'running'
-  | 'paused'
-  | 'completed'
-  | 'failed'
-  | 'canceled'
+export type TaskStatus
+  = | 'queued'
+    | 'running'
+    | 'paused'
+    | 'completed'
+    | 'failed'
+    | 'canceled'
 
 export interface SelectOption {
   label: string
@@ -12,12 +12,13 @@ export interface SelectOption {
   description?: string
 }
 
-export type FormField =
-  | { key: string, label: string, description?: string, type: 'toggle', default: boolean }
-  | { key: string, label: string, description?: string, type: 'select', options: SelectOption[], default: unknown }
-  | { key: string, label: string, description?: string, type: 'text', default: string, placeholder?: string }
-  | { key: string, label: string, description?: string, type: 'secret', default: string, placeholder?: string }
-  | { key: string, label: string, description?: string, type: 'number', default: number, min?: number, max?: number, step?: number }
+export type FormField
+  = | { key: string, label: string, description?: string, type: 'toggle', default: boolean }
+    | { key: string, label: string, description?: string, type: 'select', options: SelectOption[], default: unknown }
+    | { key: string, label: string, description?: string, type: 'text', default: string, placeholder?: string }
+    | { key: string, label: string, description?: string, type: 'textarea', default: string, placeholder?: string, rows?: number }
+    | { key: string, label: string, description?: string, type: 'secret', default: string, placeholder?: string }
+    | { key: string, label: string, description?: string, type: 'number', default: number, min?: number, max?: number, step?: number }
 
 export interface TaskDraft {
   key: string
@@ -93,68 +94,27 @@ export interface ProviderInfo {
   version: string
   description: string
   enabled: boolean
-  capabilities: {
-    authentication: boolean
-    settings: boolean
-  }
+  ui?: ProviderUiDescriptor
 }
 
-export interface ProviderAuthPage {
-  html: string
-  height: number
+export interface ProviderUiSurface {
+  id: 'management' | 'resolve' | string
+  initialHeight: number
 }
 
-export interface ProviderAuthActionRequest {
+export interface ProviderUiDescriptor {
+  apiVersion: number
+  surfaces: ProviderUiSurface[]
+}
+
+export interface ProviderUiBundle extends ProviderUiDescriptor {
+  module: string
+  style: string
+}
+
+export interface ProviderUiActionRequest {
   action: string
   payload: unknown
-}
-
-export interface ProviderSettingStatus {
-  key: string
-  label: string
-  available: boolean
-  value: string
-  description: string
-}
-
-export interface ProviderSettingAction {
-  key: string
-  label: string
-  description: string
-  style: 'primary' | 'secondary' | 'danger'
-}
-
-export interface ProviderSettingsSection {
-  key: string
-  title: string
-  description: string
-  fields: FormField[]
-  statuses: ProviderSettingStatus[]
-  actions: ProviderSettingAction[]
-}
-
-export interface ProviderSettingsPage {
-  html: string
-  height: number
-}
-
-export interface ProviderSettingsView {
-  sections: ProviderSettingsSection[]
-  customPage?: ProviderSettingsPage
-}
-
-export interface ProviderSettingsState {
-  values: Record<string, unknown>
-}
-
-export interface ProviderSettingsActionRequest {
-  action: string
-  values: Record<string, unknown>
-}
-
-export interface ProviderSettingsActionResult {
-  message: string
-  refresh: boolean
 }
 
 export interface BinaryAsset {

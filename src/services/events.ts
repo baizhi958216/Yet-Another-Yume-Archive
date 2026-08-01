@@ -8,13 +8,13 @@ import { webCall } from './transport'
 
 export type Unsubscribe = () => void
 
-export async function onTaskEvent(callback: (event: TaskEvent) => void): Promise<Unsubscribe> {
+export async function onTaskEvent(callback: (_event: TaskEvent) => void): Promise<Unsubscribe> {
   if (isTauri())
     return listen<TaskEvent>('task://event', event => callback(event.payload))
   return sseTaskEvents(callback)
 }
 
-function sseTaskEvents(callback: (event: TaskEvent) => void): Unsubscribe {
+function sseTaskEvents(callback: (_event: TaskEvent) => void): Unsubscribe {
   let fallback: Unsubscribe | undefined
   const source = new EventSource('/api/events')
   source.onmessage = (message) => {
@@ -36,7 +36,7 @@ function sseTaskEvents(callback: (event: TaskEvent) => void): Unsubscribe {
   }
 }
 
-function pollTaskEvents(callback: (event: TaskEvent) => void): Unsubscribe {
+function pollTaskEvents(callback: (_event: TaskEvent) => void): Unsubscribe {
   let stopped = false
   let sequence = 0
   const poll = async () => {

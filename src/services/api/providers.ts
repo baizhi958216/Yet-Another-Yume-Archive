@@ -1,11 +1,7 @@
 import type {
-  ProviderAuthActionRequest,
-  ProviderAuthPage,
   ProviderInfo,
-  ProviderSettingsActionRequest,
-  ProviderSettingsActionResult,
-  ProviderSettingsState,
-  ProviderSettingsView,
+  ProviderUiActionRequest,
+  ProviderUiBundle,
 } from '../../types'
 import { transport } from '../transport'
 
@@ -22,53 +18,19 @@ export function setProviderEnabled(id: string, enabled: boolean) {
   )
 }
 
-export function authDescribe(providerId: string) {
-  return transport<ProviderAuthPage>(
-    'provider_auth_describe',
+export function uiBundle(providerId: string) {
+  return transport<ProviderUiBundle>(
+    'provider_ui_bundle',
     { providerId },
-    `/providers/${encodeURIComponent(providerId)}/auth/describe`,
+    `/providers/${encodeURIComponent(providerId)}/ui`,
   )
 }
 
-export function authInvoke(providerId: string, request: ProviderAuthActionRequest) {
+export function uiInvoke(providerId: string, request: ProviderUiActionRequest) {
   return transport<unknown>(
-    'provider_auth_invoke',
+    'provider_ui_invoke',
     { providerId, request },
-    `/providers/${encodeURIComponent(providerId)}/auth/actions`,
-    { method: 'POST', body: JSON.stringify(request) },
-  )
-}
-
-export function settingsDescribe(providerId: string) {
-  return transport<ProviderSettingsView>(
-    'provider_settings_describe',
-    { providerId },
-    `/providers/${encodeURIComponent(providerId)}/settings/describe`,
-  )
-}
-
-export function settingsGet(providerId: string) {
-  return transport<ProviderSettingsState>(
-    'provider_settings_get',
-    { providerId },
-    `/providers/${encodeURIComponent(providerId)}/settings`,
-  )
-}
-
-export function settingsUpdate(providerId: string, state: ProviderSettingsState) {
-  return transport<ProviderSettingsState>(
-    'provider_settings_update',
-    { providerId, state },
-    `/providers/${encodeURIComponent(providerId)}/settings`,
-    { method: 'PUT', body: JSON.stringify(state) },
-  )
-}
-
-export function settingsInvoke(providerId: string, request: ProviderSettingsActionRequest) {
-  return transport<ProviderSettingsActionResult>(
-    'provider_settings_invoke',
-    { providerId, request },
-    `/providers/${encodeURIComponent(providerId)}/settings/actions`,
+    `/providers/${encodeURIComponent(providerId)}/ui/actions`,
     { method: 'POST', body: JSON.stringify(request) },
   )
 }
