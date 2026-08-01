@@ -1,8 +1,12 @@
 [package]
 name = "provider-direct"
+
 version.workspace = true
+
 edition.workspace = true
+
 license.workspace = true
+
 description = "Built-in direct HTTP/HTTPS download provider"
 
 [dependencies]

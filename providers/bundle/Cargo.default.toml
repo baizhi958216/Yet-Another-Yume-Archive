@@ -3,9 +3,13 @@
 # the built-in direct provider and must never name any site-specific provider.
 [package]
 name = "yaya-provider-bundle"
+
 version.workspace = true
+
 edition.workspace = true
+
 license.workspace = true
+
 description = "Static provider registration point (default: direct provider only)"
 
 [dependencies]

@@ -1,0 +1,9 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "baseUrl": ".",
+    "paths": { "@yaya/provider-ui": ["../../../packages/provider-ui/src/index.ts"] }
+  },
+  "include": ["src/**/*.ts", "src/**/*.vue", "../../../packages/provider-ui/src/**/*.ts", "../../../packages/provider-ui/src/**/*.vue"]
+}

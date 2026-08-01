@@ -1,4 +1,4 @@
-//! stdio protocol shell (protocol v1): one JSON request on stdin, progress
+//! stdio protocol shell: one JSON request on stdin, progress
 //! event lines plus one terminal response on stdout.
 
 use std::{io::Read, sync::Arc};
@@ -58,7 +58,7 @@ async fn run() -> Result<Value, ProviderError> {
             "id": provider.id(),
             "name": "Direct Download",
             "version": env!("CARGO_PKG_VERSION"),
-            "capabilities": { "authentication": false },
+            "ui": { "apiVersion": 1, "surfaces": [{ "id": "resolve", "initialHeight": 82 }] },
         })),
         "inspect" => {
             let params: ProviderInput = serde_json::from_value(request.params).map_err(invalid)?;

@@ -16,6 +16,7 @@
 
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -55,7 +56,7 @@ const pushes = providers
   .join('\n')
 const lib = `${readFileSync(join(bundleDir, 'src', 'lib.default.rs'), 'utf8')
   .trimEnd()
-  .replace(/\n\s*values\n}$/m, `\n${pushes}\n    values\n}`)}
+  .replace(/\n\s*values\n\}$/m, `\n${pushes}\n    values\n}`)}
 `
 
 writeFileSync(join(bundleDir, 'Cargo.toml'), cargo)

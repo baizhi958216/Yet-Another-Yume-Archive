@@ -11,9 +11,10 @@ use url::Url;
 use yaya_download_engine::{DownloadEngine, DownloadOptions, ResourceSpec};
 use yaya_provider_api::{
     Artifact, ProgressReporter, Provider, ProviderError, ProviderInput, ProviderTaskRequest,
-    ProviderView, TaskDraft, TaskProgress,
+    ProviderUiBundle, ProviderUiDescriptor, ProviderUiSurface, ProviderView, TaskDraft,
+    TaskProgress, PROVIDER_UI_API_VERSION,
 };
-use yaya_provider_host::{ProviderCapabilities, ProviderControl, ProviderDescriptor};
+use yaya_provider_host::{HostError, ProviderControl, ProviderDescriptor};
 
 #[derive(Clone)]
 pub struct DirectProvider {
@@ -195,12 +196,27 @@ impl ProviderControl for DirectProvider {
             name: "Direct Download".into(),
             version: env!("CARGO_PKG_VERSION").into(),
             description: "下载 HTTP 或 HTTPS 地址指向的内容。".into(),
-            capabilities: ProviderCapabilities {
-                authentication: false,
-                settings: false,
-            },
+            ui: Some(ProviderUiDescriptor {
+                api_version: PROVIDER_UI_API_VERSION,
+                surfaces: vec![ProviderUiSurface {
+                    id: "resolve".into(),
+                    initial_height: 82,
+                }],
+            }),
             enabled_by_default: true,
         }
+    }
+
+    fn ui_bundle(&self) -> Result<Option<ProviderUiBundle>, HostError> {
+        Ok(Some(ProviderUiBundle {
+            api_version: PROVIDER_UI_API_VERSION,
+            surfaces: vec![ProviderUiSurface {
+                id: "resolve".into(),
+                initial_height: 82,
+            }],
+            module: include_str!("../../../ui/dist/provider-ui.js").into(),
+            style: include_str!("../../../ui/dist/provider-ui.css").into(),
+        }))
     }
 }
 

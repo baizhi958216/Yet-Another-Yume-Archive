@@ -2,7 +2,7 @@
 # deliberately not a member of the host workspace.
 [workspace]
 resolver = "2"
-members = ["crates/provider-direct"]
+members = [ "crates/provider-direct" ]
 
 [workspace.package]
 version = "0.1.1"
@@ -13,12 +13,29 @@ license = "GPL-3.0-only"
 async-trait = "0.1"
 mime_guess = "2"
 percent-encoding = "2"
-reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "stream", "gzip", "brotli"] }
-serde = { version = "1", features = ["derive"] }
+reqwest = { version = "0.12", default-features = false, features = [
+  "rustls-tls",
+  "json",
+  "stream",
+  "gzip",
+  "brotli"
+] }
+serde = { version = "1", features = [ "derive" ] }
 serde_json = "1"
 thiserror = "2"
-tokio = { version = "1", features = ["fs", "io-util", "io-std", "macros", "rt-multi-thread", "sync", "time"] }
-tokio-util = { version = "0.7", features = ["io", "rt"] }
+tokio = { version = "1", features = [
+  "fs",
+  "io-util",
+  "io-std",
+  "macros",
+  "rt-multi-thread",
+  "sync",
+  "time"
+] }
+tokio-util = { version = "0.7", features = [
+  "io",
+  "rt"
+] }
 url = "2"
 yaya-provider-api = { path = "../../crates/provider-api" }
 yaya-provider-host = { path = "../../crates/provider-host" }
