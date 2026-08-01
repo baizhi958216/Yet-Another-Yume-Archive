@@ -8,7 +8,7 @@ use std::{
 };
 
 use serde::{Deserialize, Serialize};
-use yaya_provider_api::ProviderRegistry;
+use yaya_provider_api::{ProviderRegistry, ProviderUiBundle};
 
 use crate::{HostError, HostedProvider, ProviderControl, ProviderInfo};
 
@@ -102,6 +102,10 @@ impl ProviderManager {
         params: serde_json::Value,
     ) -> Result<serde_json::Value, HostError> {
         self.control(id)?.invoke(method, params).await
+    }
+
+    pub fn ui_bundle(&self, id: &str) -> Result<Option<ProviderUiBundle>, HostError> {
+        self.control(id)?.ui_bundle()
     }
 
     fn control(&self, id: &str) -> Result<Arc<dyn ProviderControl>, HostError> {

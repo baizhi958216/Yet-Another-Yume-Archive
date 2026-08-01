@@ -11,7 +11,7 @@ members = [
   "src-web",
 ]
 # Provider source checkouts are independent workspaces (independent release units).
-exclude = ["providers/direct", "providers/yaya-provider-bilibili"]
+exclude = [ "providers/direct" ]
 
 [workspace.package]
 version = "0.1.1"
@@ -24,14 +24,37 @@ axum = "0.8"
 base64 = "0.22"
 bytes = "1"
 futures-util = "0.3"
-reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "stream", "gzip", "brotli"] }
-rusqlite = { version = "0.37", features = ["bundled"] }
-serde = { version = "1", features = ["derive"] }
+reqwest = { version = "0.12", default-features = false, features = [
+  "rustls-tls",
+  "json",
+  "stream",
+  "gzip",
+  "brotli"
+] }
+rusqlite = { version = "0.37", features = [ "bundled" ] }
+serde = { version = "1", features = [ "derive" ] }
 serde_json = "1"
 sha2 = "0.10"
 thiserror = "2"
-tokio = { version = "1", features = ["fs", "io-util", "macros", "process", "rt-multi-thread", "sync", "time"] }
-tokio-util = { version = "0.7", features = ["io", "rt"] }
-tower-http = { version = "0.6", features = ["fs", "trace"] }
+tokio = { version = "1", features = [
+  "fs",
+  "io-util",
+  "macros",
+  "process",
+  "rt-multi-thread",
+  "sync",
+  "time"
+] }
+tokio-util = { version = "0.7", features = [
+  "io",
+  "rt"
+] }
+tower-http = { version = "0.6", features = [
+  "fs",
+  "trace"
+] }
 url = "2"
-uuid = { version = "1", features = ["v4", "serde"] }
+uuid = { version = "1", features = [
+  "v4",
+  "serde"
+] }

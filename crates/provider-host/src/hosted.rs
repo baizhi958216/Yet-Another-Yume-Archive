@@ -5,9 +5,9 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use yaya_provider_api::Provider;
+use yaya_provider_api::{Provider, ProviderUiBundle, ProviderUiDescriptor};
 
-use crate::{HostError, ProviderCapabilities, ProviderInfo};
+use crate::{HostError, ProviderInfo};
 
 #[derive(Debug, Clone)]
 pub struct ProviderDescriptor {
@@ -15,13 +15,17 @@ pub struct ProviderDescriptor {
     pub name: String,
     pub version: String,
     pub description: String,
-    pub capabilities: ProviderCapabilities,
+    pub ui: Option<ProviderUiDescriptor>,
     pub enabled_by_default: bool,
 }
 
 #[async_trait]
 pub trait ProviderControl: Send + Sync {
     fn descriptor(&self) -> ProviderDescriptor;
+
+    fn ui_bundle(&self) -> Result<Option<ProviderUiBundle>, HostError> {
+        Ok(None)
+    }
 
     /// Generic control-plane dispatch (auth methods etc.). The host forwards
     /// method names blindly; the closed set lives in the protocol doc.
@@ -74,7 +78,7 @@ impl HostedProvider {
             version: descriptor.version,
             description: descriptor.description,
             enabled,
-            capabilities: descriptor.capabilities,
+            ui: descriptor.ui,
         }
     }
 }

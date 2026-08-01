@@ -30,6 +30,14 @@ pub enum FormControl {
         #[serde(default)]
         placeholder: String,
     },
+    Textarea {
+        #[serde(default)]
+        default: String,
+        #[serde(default)]
+        placeholder: String,
+        #[serde(default)]
+        rows: Option<u32>,
+    },
     Secret {
         #[serde(default)]
         default: String,

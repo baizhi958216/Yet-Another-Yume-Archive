@@ -12,7 +12,7 @@ use tokio::{
 use tokio_util::sync::CancellationToken;
 use yaya_provider_api::{
     Artifact, BinaryAsset, ProgressReporter, Provider, ProviderError, ProviderInput,
-    ProviderTaskRequest, ProviderView,
+    ProviderTaskRequest, ProviderUiBundle, ProviderView,
 };
 
 use crate::{
@@ -25,15 +25,34 @@ pub struct ExternalProvider {
     manifest: ProviderManifest,
     executable: PathBuf,
     data_dir: PathBuf,
+    package_dir: PathBuf,
 }
 
 impl ExternalProvider {
-    pub(crate) fn new(manifest: ProviderManifest, executable: PathBuf, data_dir: PathBuf) -> Self {
+    pub(crate) fn new(
+        manifest: ProviderManifest,
+        executable: PathBuf,
+        data_dir: PathBuf,
+        package_dir: PathBuf,
+    ) -> Self {
         Self {
             manifest,
             executable,
             data_dir,
+            package_dir,
         }
+    }
+
+    fn read_ui_asset(&self, relative: &str) -> Result<String, HostError> {
+        let package = self.package_dir.canonicalize()?;
+        let asset = self.package_dir.join(relative).canonicalize()?;
+        if !asset.starts_with(&package) || !asset.is_file() {
+            return Err(HostError::Manifest(format!(
+                "provider {} UI asset escapes its package: {relative}",
+                self.manifest.id
+            )));
+        }
+        Ok(std::fs::read_to_string(asset)?)
     }
 
     pub fn id(&self) -> &str {
@@ -162,9 +181,24 @@ impl ProviderControl for ExternalProvider {
             name: self.manifest.name.clone(),
             version: self.manifest.version.clone(),
             description: self.manifest.description.clone(),
-            capabilities: self.manifest.capabilities.clone(),
+            ui: self.manifest.ui.as_ref().map(|value| value.descriptor()),
             enabled_by_default: self.manifest.enabled_by_default,
         }
+    }
+
+    fn ui_bundle(&self) -> Result<Option<ProviderUiBundle>, HostError> {
+        let Some(ui) = &self.manifest.ui else {
+            return Ok(None);
+        };
+        Ok(Some(ProviderUiBundle {
+            api_version: ui.api_version,
+            surfaces: ui.surfaces.clone(),
+            module: self.read_ui_asset(&ui.entry)?,
+            style: match &ui.style {
+                Some(path) => self.read_ui_asset(path)?,
+                None => String::new(),
+            },
+        }))
     }
 
     async fn invoke(

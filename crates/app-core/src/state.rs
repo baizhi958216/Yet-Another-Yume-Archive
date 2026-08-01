@@ -69,6 +69,9 @@ fn external_roots(paths: &AppPaths) -> Vec<PathBuf> {
     let mut roots = vec![paths.data_dir.join("providers")];
     if let Ok(cwd) = std::env::current_dir() {
         roots.push(cwd.join("providers"));
+        if let Some(parent) = cwd.parent() {
+            roots.push(parent.join("providers"));
+        }
     }
     if let Some(extra) = std::env::var_os("YAYA_PROVIDERS_DIR") {
         roots.push(PathBuf::from(extra));

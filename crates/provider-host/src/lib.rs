@@ -16,5 +16,5 @@ pub use error::HostError;
 pub use external::ExternalProvider;
 pub use hosted::{HostedProvider, ProviderControl, ProviderDescriptor};
 pub use manager::ProviderManager;
-pub use manifest::{MatchRule, ProviderCapabilities, ProviderInfo, ProviderManifest};
+pub use manifest::{MatchRule, ProviderInfo, ProviderManifest, ProviderUiManifest};
 pub use protocol::PROVIDER_PROTOCOL_VERSION;

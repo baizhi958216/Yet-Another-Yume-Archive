@@ -4,8 +4,9 @@
 use std::{collections::BTreeMap, path::Path};
 
 use crate::{ExternalProvider, HostError, HostedProvider, ProviderManifest};
+use yaya_provider_api::PROVIDER_UI_API_VERSION;
 
-const PROVIDER_MANIFEST_SCHEMA_VERSION: u32 = 1;
+const PROVIDER_MANIFEST_SCHEMA_VERSION: u32 = 2;
 
 pub fn scan(root: &Path) -> Result<Vec<HostedProvider>, HostError> {
     let entries = match std::fs::read_dir(root) {
@@ -28,6 +29,13 @@ pub fn scan(root: &Path) -> Result<Vec<HostedProvider>, HostError> {
         if manifest.schema_version != PROVIDER_MANIFEST_SCHEMA_VERSION {
             continue;
         }
+        if manifest
+            .ui
+            .as_ref()
+            .is_some_and(|ui| ui.api_version != PROVIDER_UI_API_VERSION)
+        {
+            continue;
+        }
         let Some(candidates) = manifest.executables.get(target_key()) else {
             continue;
         };
@@ -40,7 +48,7 @@ pub fn scan(root: &Path) -> Result<Vec<HostedProvider>, HostError> {
         };
         let data_dir = root.join(".data").join(&manifest.id);
         providers.push(HostedProvider::new(ExternalProvider::new(
-            manifest, executable, data_dir,
+            manifest, executable, data_dir, directory,
         )));
     }
     Ok(providers)

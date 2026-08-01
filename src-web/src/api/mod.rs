@@ -27,21 +27,6 @@ pub(crate) fn router() -> Router<Arc<WebState>> {
         .route("/providers", get(providers::list))
         .route("/providers/{id}/enabled", post(providers::set_enabled))
         .route("/providers/{id}/asset", get(input::provider_asset))
-        .route(
-            "/providers/{id}/auth/describe",
-            get(providers::auth_describe),
-        )
-        .route("/providers/{id}/auth/actions", post(providers::auth_invoke))
-        .route(
-            "/providers/{id}/settings/describe",
-            get(providers::settings_describe),
-        )
-        .route(
-            "/providers/{id}/settings",
-            get(providers::settings_get).put(providers::settings_update),
-        )
-        .route(
-            "/providers/{id}/settings/actions",
-            post(providers::settings_invoke),
-        )
+        .route("/providers/{id}/ui", get(providers::ui_bundle))
+        .route("/providers/{id}/ui/actions", post(providers::ui_invoke))
 }

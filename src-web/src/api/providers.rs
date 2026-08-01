@@ -5,10 +5,7 @@ use axum::{
     Json,
 };
 use serde::Deserialize;
-use yaya_provider_api::{
-    ProviderAuthActionRequest, ProviderAuthPage, ProviderSettingsActionRequest,
-    ProviderSettingsActionResult, ProviderSettingsState, ProviderSettingsView,
-};
+use yaya_provider_api::{ProviderUiActionRequest, ProviderUiBundle};
 use yaya_provider_host::ProviderInfo;
 
 use crate::{error::ApiError, WebState};
@@ -30,51 +27,17 @@ pub(crate) async fn set_enabled(
     Ok(Json(state.core.set_provider_enabled(&id, request.enabled)?))
 }
 
-pub(crate) async fn auth_describe(
+pub(crate) async fn ui_bundle(
     State(state): State<Arc<WebState>>,
     Path(id): Path<String>,
-) -> Result<Json<ProviderAuthPage>, ApiError> {
-    Ok(Json(state.core.provider_auth_describe(&id).await?))
+) -> Result<Json<ProviderUiBundle>, ApiError> {
+    Ok(Json(state.core.provider_ui_bundle(&id)?))
 }
 
-pub(crate) async fn auth_invoke(
+pub(crate) async fn ui_invoke(
     State(state): State<Arc<WebState>>,
     Path(id): Path<String>,
-    Json(request): Json<ProviderAuthActionRequest>,
+    Json(request): Json<ProviderUiActionRequest>,
 ) -> Result<Json<serde_json::Value>, ApiError> {
-    Ok(Json(state.core.provider_auth_invoke(&id, request).await?))
-}
-
-pub(crate) async fn settings_describe(
-    State(state): State<Arc<WebState>>,
-    Path(id): Path<String>,
-) -> Result<Json<ProviderSettingsView>, ApiError> {
-    Ok(Json(state.core.provider_settings_describe(&id).await?))
-}
-
-pub(crate) async fn settings_get(
-    State(state): State<Arc<WebState>>,
-    Path(id): Path<String>,
-) -> Result<Json<ProviderSettingsState>, ApiError> {
-    Ok(Json(state.core.provider_settings_get(&id).await?))
-}
-
-pub(crate) async fn settings_update(
-    State(state): State<Arc<WebState>>,
-    Path(id): Path<String>,
-    Json(settings): Json<ProviderSettingsState>,
-) -> Result<Json<ProviderSettingsState>, ApiError> {
-    Ok(Json(
-        state.core.provider_settings_update(&id, settings).await?,
-    ))
-}
-
-pub(crate) async fn settings_invoke(
-    State(state): State<Arc<WebState>>,
-    Path(id): Path<String>,
-    Json(request): Json<ProviderSettingsActionRequest>,
-) -> Result<Json<ProviderSettingsActionResult>, ApiError> {
-    Ok(Json(
-        state.core.provider_settings_invoke(&id, request).await?,
-    ))
+    Ok(Json(state.core.provider_ui_invoke(&id, request).await?))
 }

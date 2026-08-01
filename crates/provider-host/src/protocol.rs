@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use yaya_provider_api::ProviderError;
 
-pub const PROVIDER_PROTOCOL_VERSION: u32 = 1;
+pub const PROVIDER_PROTOCOL_VERSION: u32 = 2;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
