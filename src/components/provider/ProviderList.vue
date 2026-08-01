@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProviderInfo } from '../types'
+import type { ProviderInfo } from '../../types'
 
 defineProps<{
   providers: ProviderInfo[]
@@ -7,7 +7,7 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  settings: [provider: ProviderInfo]
+  manage: [provider: ProviderInfo]
   toggle: [provider: ProviderInfo, event: Event]
 }>()
 </script>
@@ -44,7 +44,7 @@ const emit = defineEmits<{
           </p>
         </div>
         <div class="flex items-center gap-2">
-          <button v-if="provider.capabilities.authentication || provider.capabilities.settings" class="icon-btn" :disabled="!provider.enabled" :title="`${provider.name} 设置`" @click="emit('settings', provider)">
+          <button v-if="provider.ui?.surfaces.some(surface => surface.id === 'management')" class="icon-btn" :disabled="!provider.enabled" :title="`${provider.name} 管理`" @click="emit('manage', provider)">
             <span class="i-lucide-settings-2" />
           </button>
           <label class="relative h-6 w-11 shrink-0 cursor-pointer" :title="provider.enabled ? '停用插件' : '启用插件'">

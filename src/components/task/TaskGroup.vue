@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { TaskSnapshot } from '../types'
+import type { TaskSnapshot } from '../../types'
 import { computed, ref } from 'vue'
-import { formatBytes } from '../composables/useFormat'
-import SmartImage from './SmartImage.vue'
+import { formatBytes } from '../../composables/useFormat'
+import SmartImage from '../ui/SmartImage.vue'
 import TaskRow from './TaskRow.vue'
 
 const props = defineProps<{ tasks: TaskSnapshot[] }>()

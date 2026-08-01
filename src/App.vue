@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import SidebarNav from './components/SidebarNav.vue'
-import ThemeControls from './components/ThemeControls.vue'
 import { getCurrentWindow } from '@tauri-apps/api/window'
+import { computed, onMounted } from 'vue'
+import SidebarNav from './components/layout/SidebarNav.vue'
+import ThemeControls from './components/layout/ThemeControls.vue'
 import { onTaskEvent } from './services/events'
 import { isApp, isDesktop } from './services/transport'
 import { useProvidersStore } from './stores/providers'

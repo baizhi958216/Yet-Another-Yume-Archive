@@ -2,7 +2,7 @@
 // Images from provider content are fetched through the provider's own
 // network context (referrers, cookies) and rendered as data URLs.
 import { ref, watch } from 'vue'
-import { providerImage } from '../services/api/input'
+import { providerImage } from '../../services/api/input'
 
 const props = withDefaults(defineProps<{
   src: string

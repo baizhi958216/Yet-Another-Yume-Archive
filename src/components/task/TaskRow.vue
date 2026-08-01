@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { TaskSnapshot } from '../types'
+import type { TaskSnapshot } from '../../types'
 import { computed, ref } from 'vue'
-import { formatBytes } from '../composables/useFormat'
-import { useTasksStore } from '../stores/tasks'
-import { useUiStore } from '../stores/ui'
-import ConfirmDialog from './ConfirmDialog.vue'
-import SmartImage from './SmartImage.vue'
+import { formatBytes } from '../../composables/useFormat'
+import { useTasksStore } from '../../stores/tasks'
+import { useUiStore } from '../../stores/ui'
+import ConfirmDialog from '../ui/ConfirmDialog.vue'
+import SmartImage from '../ui/SmartImage.vue'
 
 const props = defineProps<{ task: TaskSnapshot }>()
 const tasks = useTasksStore()

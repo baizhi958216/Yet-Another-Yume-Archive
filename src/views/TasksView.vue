@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { TaskSnapshot } from '../types'
 import { computed, ref } from 'vue'
-import TaskGroup from '../components/TaskGroup.vue'
-import TaskRow from '../components/TaskRow.vue'
+import TaskGroup from '../components/task/TaskGroup.vue'
+import TaskRow from '../components/task/TaskRow.vue'
 import { useTasksStore } from '../stores/tasks'
 
 const tasks = useTasksStore()

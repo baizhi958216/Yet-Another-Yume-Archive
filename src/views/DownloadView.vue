@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { open } from '@tauri-apps/plugin-dialog'
 import { storeToRefs } from 'pinia'
-import ResolvePanel from '../components/ResolvePanel.vue'
+import ResolvePanel from '../components/task/ResolvePanel.vue'
 import { isDesktop } from '../services/transport'
 import { useProvidersStore } from '../stores/providers'
 import { useResolveStore } from '../stores/resolve'

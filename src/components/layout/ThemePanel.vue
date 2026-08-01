@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { ThemeMode } from '../composables/useTheme'
-import { DEFAULT_ACCENT, useTheme } from '../composables/useTheme'
+import type { ThemeMode } from '../../composables/useTheme'
+import { DEFAULT_ACCENT, useTheme } from '../../composables/useTheme'
 
 const { mode, accent } = useTheme()
 const colors = [

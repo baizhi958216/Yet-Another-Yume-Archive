@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { ViewName } from '../stores/ui'
-import { useUiStore } from '../stores/ui'
+import type { ViewName } from '../../stores/ui'
+import { useUiStore } from '../../stores/ui'
 
 const ui = useUiStore()
 const items: Array<{ view: ViewName, label: string, icon: string }> = [

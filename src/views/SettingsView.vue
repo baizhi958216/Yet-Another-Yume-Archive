@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
-import FolderPicker from '../components/FolderPicker.vue'
-import NumberStepper from '../components/NumberStepper.vue'
-import ThemePanel from '../components/ThemePanel.vue'
+import ThemePanel from '../components/layout/ThemePanel.vue'
+import FolderPicker from '../components/ui/FolderPicker.vue'
+import NumberStepper from '../components/ui/NumberStepper.vue'
 import { isDesktop } from '../services/transport'
 import { useSettingsStore } from '../stores/settings'
 import { useUiStore } from '../stores/ui'
