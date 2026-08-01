@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "direct",
   "name": "Direct Download",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "下载 HTTP 或 HTTPS 地址指向的内容。",
   "enabledByDefault": true,
   "priority": -100,
