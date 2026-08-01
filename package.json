@@ -1,21 +1,26 @@
 {
   "name": "yaya",
-  "private": true,
-  "version": "0.1.1",
   "type": "module",
+  "version": "0.1.1",
+  "private": true,
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "npm run build:provider-ui && vue-tsc --noEmit && vite build",
+    "build:provider-ui": "npm run typecheck:provider-ui && npm run build:provider-ui:direct",
+    "typecheck:provider-ui": "vue-tsc --noEmit -p providers/direct/ui/tsconfig.json",
+    "build:provider-ui:direct": "vite build --config providers/direct/ui/vite.config.ts",
     "preview": "vite preview",
     "tauri": "tauri",
     "android:dev": "tauri android dev",
     "android:build": "tauri android build",
     "ios:dev": "tauri ios dev",
     "ios:build": "tauri ios build",
-    "web": "npm run build && cargo run -p yaya-web"
+    "web": "npm run build && cargo run -p yaya-web",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
@@ -24,9 +29,12 @@
     "vue": "^3.5.40"
   },
   "devDependencies": {
+    "@antfu/eslint-config": "^9.2.0",
     "@iconify-json/lucide": "^1.2.120",
     "@tauri-apps/cli": "^2",
+    "@types/node": "^26.1.2",
     "@vitejs/plugin-vue": "^6.0.8",
+    "eslint": "^10.8.0",
     "typescript": "~5.6.2",
     "unocss": "^66.7.5",
     "vite": "^8.1.5",

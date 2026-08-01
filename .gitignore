@@ -1,5 +1,8 @@
 node_modules/
 dist/
+!providers/*/ui/dist/
+!providers/*/ui/dist/provider-ui.js
+!providers/*/ui/dist/provider-ui.css
 target/
 *.local
 .DS_Store
@@ -8,6 +11,7 @@ target/
 bundle.config.json
 bundle.config.json.*
 providers/.data/
+providers/*/bin/
 
 # android release signing (local only, never commit)
 src-tauri/gen/android/keystore.properties

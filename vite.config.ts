@@ -1,12 +1,17 @@
+import process from 'node:process'
 import vue from '@vitejs/plugin-vue'
 import UnoCSS from 'unocss/vite'
 import { defineConfig } from 'vite'
 
-// @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST
 
 export default defineConfig({
   plugins: [vue(), UnoCSS()],
+  resolve: {
+    alias: {
+      vue: 'vue/dist/vue.esm-bundler.js',
+    },
+  },
   // keep rust compiler errors visible during `tauri dev`
   clearScreen: false,
   server: {
