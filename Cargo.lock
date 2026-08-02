@@ -2498,7 +2498,7 @@ dependencies = [
 
 [[package]]
 name = "provider-direct"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "async-trait",
  "mime_guess",
@@ -5044,7 +5044,7 @@ dependencies = [
 
 [[package]]
 name = "yaya"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde",
  "serde_json",
@@ -5062,7 +5062,7 @@ dependencies = [
 
 [[package]]
 name = "yaya-app-core"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde",
  "serde_json",
@@ -5075,7 +5075,7 @@ dependencies = [
 
 [[package]]
 name = "yaya-download-engine"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "bytes",
  "futures-util",
@@ -5089,7 +5089,7 @@ dependencies = [
 
 [[package]]
 name = "yaya-provider-api"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "async-trait",
  "base64 0.22.1",
@@ -5101,7 +5101,7 @@ dependencies = [
 
 [[package]]
 name = "yaya-provider-bundle"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "provider-direct",
  "yaya-provider-api",
@@ -5110,7 +5110,7 @@ dependencies = [
 
 [[package]]
 name = "yaya-provider-host"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "async-trait",
  "serde",
@@ -5123,7 +5123,7 @@ dependencies = [
 
 [[package]]
 name = "yaya-task-runtime"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "rusqlite",
  "serde",
@@ -5137,7 +5137,7 @@ dependencies = [
 
 [[package]]
 name = "yaya-web"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "axum",
  "bytes",
