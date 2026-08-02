@@ -316,6 +316,11 @@ jobs:
       PRERELEASE: ${{ github.event_name == 'workflow_dispatch' && inputs.prerelease || false }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - uses: actions/download-artifact@v4
         with:
           pattern: yaya-*
@@ -332,15 +337,25 @@ jobs:
           done
           test -n "$(find upload -type f -print -quit)"
           (cd upload && sha256sum * > SHA256SUMS.txt)
+      - name: Generate release notes from commits
+        run: node scripts/generate-release-notes.mjs "$RELEASE_TAG" > release-notes.md
       - name: Create or update GitHub Release
         shell: bash
         run: |
           if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            create_args=(release create "$RELEASE_TAG" --draft --generate-notes --title "YAYA $RELEASE_TAG" --target "$GITHUB_SHA")
+            create_args=(release create "$RELEASE_TAG" --draft --notes-file release-notes.md --title "YAYA $RELEASE_TAG" --target "$GITHUB_SHA")
             if [[ "$PRERELEASE" == 'true' ]]; then
               create_args+=(--prerelease)
             fi
             gh "${create_args[@]}"
+          else
+            edit_args=(release edit "$RELEASE_TAG" --notes-file release-notes.md --title "YAYA $RELEASE_TAG")
+            if [[ "$PRERELEASE" == 'true' ]]; then
+              edit_args+=(--prerelease)
+            else
+              edit_args+=(--prerelease=false)
+            fi
+            gh "${edit_args[@]}"
           fi
           gh release upload "$RELEASE_TAG" upload/* --clobber
           gh release edit "$RELEASE_TAG" --draft=false
