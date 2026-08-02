@@ -9,9 +9,10 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run build:provider-ui && vue-tsc --noEmit && vite build",
-    "build:provider-ui": "npm run typecheck:provider-ui && npm run build:provider-ui:direct",
+    "build:provider-ui": "npm run typecheck:provider-ui && npm run build:provider-ui:direct && npm run build:provider-ui:torrent",
     "typecheck:provider-ui": "vue-tsc --noEmit -p providers/direct/ui/tsconfig.json",
     "build:provider-ui:direct": "vite build --config providers/direct/ui/vite.config.ts",
+    "build:provider-ui:torrent": "vite build --config providers/yaya-provider-torrent/ui/vite.config.ts",
     "preview": "vite preview",
     "tauri": "tauri",
     "android:dev": "tauri android dev",
