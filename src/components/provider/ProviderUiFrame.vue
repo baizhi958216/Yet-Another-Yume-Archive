@@ -90,7 +90,10 @@ addEventListener('message',async event=>{
     }catch(error){send({type:'error',error:error instanceof Error?error.message:String(error)});}
   }
 });
-new ResizeObserver(()=>send({type:'resize',height:Math.max(document.body.scrollHeight,document.documentElement.scrollHeight)})).observe(document.documentElement);
+const appEl=document.querySelector('#app');
+const measure=()=>{const el=appEl?.firstElementChild||appEl;return el?Math.ceil(el.getBoundingClientRect().height):0;};
+const observer=new ResizeObserver(()=>{const h=measure();if(h>0)send({type:'resize',height:h});});
+if(appEl)observer.observe(appEl);
 send({type:'ready'});
 <\/script></body></html>`
 })
@@ -153,7 +156,10 @@ async function onMessage(event: MessageEvent) {
     return
   }
   if (message.type === 'resize' && typeof message.height === 'number') {
-    height.value = clampHeight(message.height + 2)
+    const newHeight = clampHeight(message.height)
+    if (Math.abs(height.value - newHeight) > 1) {
+      height.value = newHeight
+    }
     return
   }
   if (message.type === 'state') {
@@ -275,6 +281,7 @@ watch(surface, (value) => {
                 :surface="modal.surface"
                 :context="modal.context"
                 :title="modal.title"
+                @state="emit('state', $event)"
                 @close="finishModal"
               />
             </div>

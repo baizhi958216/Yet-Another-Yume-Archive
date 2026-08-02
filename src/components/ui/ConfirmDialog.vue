@@ -29,7 +29,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
           <h2 class="m-0 text-base font-600">
             {{ title }}
           </h2>
-          <p v-if="message" class="mb-0 mt-2 text-sm text-muted">
+          <p v-if="message" class="mb-0 mt-2 text-sm text-muted [overflow-wrap:anywhere]">
             {{ message }}
           </p>
           <div class="mt-6 flex justify-end gap-2">
