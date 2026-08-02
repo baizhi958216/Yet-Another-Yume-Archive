@@ -3,13 +3,19 @@
 
 mod commands;
 
+#[cfg(target_os = "android")]
+mod android_download;
+
 use tauri::{Emitter, Manager};
 use yaya_app_core::{AppCore, AppPaths};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
+    let builder = tauri::Builder::default().plugin(tauri_plugin_dialog::init());
+    #[cfg(target_os = "android")]
+    let builder = builder.plugin(android_download::init());
+
+    builder
         .setup(|app| {
             let data_dir = app.path().app_data_dir()?;
             // iOS forbids creating directories at the container root (where
@@ -21,7 +27,9 @@ pub fn run() {
                 .document_dir()
                 .unwrap_or_else(|_| data_dir.join("downloads"))
                 .join("YAYA");
-            #[cfg(not(target_os = "ios"))]
+            #[cfg(target_os = "android")]
+            let default_output_dir = data_dir.join("downloads");
+            #[cfg(not(any(target_os = "ios", target_os = "android")))]
             let default_output_dir = app
                 .path()
                 .download_dir()
@@ -30,16 +38,33 @@ pub fn run() {
             let core = tauri::async_runtime::block_on(AppCore::open(
                 AppPaths {
                     data_dir,
-                    default_output_dir,
+                    default_output_dir: default_output_dir.clone(),
                 },
                 yaya_provider_bundle::providers(),
             ))?;
+
+            // Providers need a regular filesystem path. Android downloads are
+            // staged privately, then published through SAF/MediaStore below.
+            #[cfg(target_os = "android")]
+            tauri::async_runtime::block_on(async {
+                let mut settings = core.get_settings().await?;
+                if settings.default_output_dir != default_output_dir {
+                    settings.default_output_dir = default_output_dir;
+                    core.update_settings(settings).await?;
+                }
+                core.runtime()
+                    .set_artifact_publisher(std::sync::Arc::new(
+                        android_download::AndroidArtifactPublisher(app.handle().clone()),
+                    ))
+                    .await;
+                Ok::<(), yaya_app_core::AppError>(())
+            })?;
 
             let mut events = core.subscribe();
             let handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
                 while let Ok(event) = events.recv().await {
-                    let _ = handle.emit("task://event", event);
+                    let _ = handle.emit("task://event", &event);
                 }
             });
             app.manage(core);
@@ -69,6 +94,8 @@ pub fn run() {
             commands::tasks::delete_task,
             commands::settings::get_settings,
             commands::settings::update_settings,
+            commands::settings::get_android_download_directory,
+            commands::settings::pick_android_download_directory,
             commands::providers::list_providers,
             commands::providers::set_provider_enabled,
             commands::providers::provider_ui_bundle,
