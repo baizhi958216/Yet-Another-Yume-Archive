@@ -6,6 +6,7 @@ license.workspace = true
 description = "Generic task persistence, scheduling and event broadcasting for YAYA hosts"
 
 [dependencies]
+async-trait = { workspace = true }
 rusqlite = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

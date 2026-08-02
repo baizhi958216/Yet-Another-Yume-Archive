@@ -5046,6 +5046,7 @@ dependencies = [
 name = "yaya"
 version = "0.1.2"
 dependencies = [
+ "async-trait",
  "serde",
  "serde_json",
  "sha2",
@@ -5053,6 +5054,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-dialog",
  "tokio",
+ "tokio-util",
  "yaya-app-core",
  "yaya-provider-api",
  "yaya-provider-bundle",
@@ -5125,6 +5127,7 @@ dependencies = [
 name = "yaya-task-runtime"
 version = "0.1.2"
 dependencies = [
+ "async-trait",
  "rusqlite",
  "serde",
  "serde_json",

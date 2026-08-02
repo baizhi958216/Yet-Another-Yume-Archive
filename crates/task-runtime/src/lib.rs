@@ -6,9 +6,11 @@
 
 mod error;
 mod model;
+mod publisher;
 mod runtime;
 mod storage;
 
 pub use error::RuntimeError;
 pub use model::*;
+pub use publisher::ArtifactPublisher;
 pub use runtime::TaskRuntime;

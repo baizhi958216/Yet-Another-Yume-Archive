@@ -4,7 +4,7 @@
 use std::sync::Arc;
 
 use tokio_util::sync::CancellationToken;
-use yaya_provider_api::ProviderTaskRequest;
+use yaya_provider_api::{ProgressReporter, ProviderTaskRequest, TaskProgress};
 
 use super::{now_millis, reporter::RuntimeReporter, TaskRuntime};
 use crate::{RuntimeError, TaskStatus};
@@ -59,7 +59,21 @@ impl TaskRuntime {
             runtime: self.clone(),
             id: id.to_string(),
         });
-        let artifacts = provider.run(request, reporter, cancellation).await?;
+        let mut artifacts = provider
+            .run(request, reporter.clone(), cancellation.clone())
+            .await?;
+        if let Some(publisher) = self.inner.publisher.read().await.clone() {
+            let current = self.task(id).await?;
+            reporter.report(TaskProgress {
+                completed: current.completed,
+                total: current.total,
+                rate: 0,
+                message: "Publishing files".into(),
+            });
+            artifacts = publisher
+                .publish(&current, artifacts, reporter.clone(), cancellation)
+                .await?;
+        }
         {
             let mut tasks = self.inner.tasks.write().await;
             let task = tasks

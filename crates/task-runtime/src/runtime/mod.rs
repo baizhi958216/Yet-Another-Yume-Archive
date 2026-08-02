@@ -16,7 +16,10 @@ use tokio::sync::{broadcast, Mutex, RwLock};
 use tokio_util::sync::CancellationToken;
 use yaya_provider_api::{BinaryAsset, ProviderRegistry, ProviderView};
 
-use crate::{storage::Storage, RuntimeError, RuntimeSettings, TaskEvent, TaskSnapshot, TaskStatus};
+use crate::{
+    storage::Storage, ArtifactPublisher, RuntimeError, RuntimeSettings, TaskEvent, TaskSnapshot,
+    TaskStatus,
+};
 
 #[derive(Clone)]
 pub struct TaskRuntime {
@@ -29,6 +32,7 @@ pub(super) struct Inner {
     pub tasks: RwLock<HashMap<String, TaskSnapshot>>,
     pub cancellations: Mutex<HashMap<String, CancellationToken>>,
     pub settings: RwLock<RuntimeSettings>,
+    pub publisher: RwLock<Option<Arc<dyn ArtifactPublisher>>>,
     pub sequence: AtomicU64,
     pub active: AtomicUsize,
     pub scheduling: AtomicBool,
@@ -62,6 +66,7 @@ impl TaskRuntime {
                 tasks: RwLock::new(tasks),
                 cancellations: Mutex::new(HashMap::new()),
                 settings: RwLock::new(settings),
+                publisher: RwLock::new(None),
                 sequence: AtomicU64::new(0),
                 active: AtomicUsize::new(0),
                 scheduling: AtomicBool::new(false),
@@ -126,6 +131,10 @@ impl TaskRuntime {
         *self.inner.settings.write().await = settings;
         self.kick();
         Ok(())
+    }
+
+    pub async fn set_artifact_publisher(&self, publisher: Arc<dyn ArtifactPublisher>) {
+        *self.inner.publisher.write().await = Some(publisher);
     }
 }
 
