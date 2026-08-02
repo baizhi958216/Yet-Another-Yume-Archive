@@ -3,6 +3,7 @@
 import { invoke, isTauri } from '@tauri-apps/api/core'
 
 const mobileTauri = isTauri() && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+const androidTauri = isTauri() && /Android/i.test(navigator.userAgent)
 
 export function isDesktop() {
   return isTauri() && !mobileTauri
@@ -10,6 +11,10 @@ export function isDesktop() {
 
 export function isApp() {
   return isTauri()
+}
+
+export function isAndroid() {
+  return androidTauri
 }
 
 async function webCall<T>(path: string, init?: RequestInit): Promise<T> {

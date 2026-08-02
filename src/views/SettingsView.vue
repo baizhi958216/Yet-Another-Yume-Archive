@@ -2,9 +2,10 @@
 import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import ThemePanel from '../components/layout/ThemePanel.vue'
+import AndroidFolderPicker from '../components/ui/AndroidFolderPicker.vue'
 import FolderPicker from '../components/ui/FolderPicker.vue'
 import NumberStepper from '../components/ui/NumberStepper.vue'
-import { isDesktop } from '../services/transport'
+import { isAndroid, isApp, isDesktop } from '../services/transport'
 import { useSettingsStore } from '../stores/settings'
 import { useUiStore } from '../stores/ui'
 
@@ -12,6 +13,8 @@ const store = useSettingsStore()
 const ui = useUiStore()
 const { settings } = storeToRefs(store)
 const saved = ref(false)
+const app = isApp()
+const android = isAndroid()
 const desktop = isDesktop()
 
 async function save() {
@@ -29,7 +32,7 @@ async function save() {
 <template>
   <section>
     <div class="divide-y divide-line">
-      <div v-if="desktop" class="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+      <div class="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
         <div class="min-w-0">
           <h2 class="m-0 text-sm font-600">
             默认保存目录
@@ -39,7 +42,18 @@ async function save() {
           </p>
         </div>
         <div class="w-full sm:w-[400px] sm:shrink-0">
-          <FolderPicker v-model="settings.defaultOutputDir" />
+          <AndroidFolderPicker v-if="android" />
+          <FolderPicker v-else-if="desktop" v-model="settings.defaultOutputDir" />
+          <input
+            v-else-if="!app"
+            v-model="settings.defaultOutputDir"
+            type="text"
+            class="field"
+            placeholder="请输入默认保存目录"
+          >
+          <div v-else class="h-11 w-full flex items-center rounded-control bg-soft px-3 text-xs text-muted">
+            {{ settings.defaultOutputDir }}
+          </div>
         </div>
       </div>
 
